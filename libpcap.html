@@ -68,6 +68,62 @@ int main(int argc, char *argv[])
   return 0;
 }
 ```
+3. complie
+```
+test4: test4.c
+	gcc -g -Wall -o test4 test4.c -lpcap
+```
+4. deal output
+E.g. 
+wget from 123.58.173.185:
+```
+sudo ./test4 enp0s29u1u2 "host 123.58.173.185 and dst port 80" > /tmp/output
+sudo ./test4 enp0s29u1u2 "host 123.58.173.185 and src port 80" > /tmp/input
+```
+```
+#!/bin/bash
+
+#每隔5分钟(使用定时任务)(snmp 周期)将输入截取为一个文件，累加流量除以时间差得到5分钟内平均带宽由snmp取走。
+
+mv /tmp/output /tmp/output_deal
+:>/tmp/output
+
+#去掉第一行和最后一行
+
+sed -i '1d;$d' /tmp/output_deal
+
+otraffic=`cat /tmp/output_deal |awk '{print $2}'|tr "\n" "+"`
+
+otraffic=`echo ${otraffic}0|bc`
+
+ostime=`cat /tmp/output_deal | head -1|awk '{print $1}'`
+oetime=`cat /tmp/output_deal | tail -1|awk '{print $1}'`
+ointerval=`expr $oetime - $ostime`
+
+obandwidth=`expr $otraffic / $ointerval`
+
+mv /tmp/input /tmp/input_deal
+:>/tmp/input
+
+#去掉第一行和最后一行
+
+sed -i '1d;$d' /tmp/input_deal
+
+itraffic=`cat /tmp/input_deal |awk '{print $2}'|tr "\n" "+"`
+
+itraffic=`echo ${itraffic}0|bc`
+
+istime=`cat /tmp/input_deal | head -1|awk '{print $1}'`
+ietime=`cat /tmp/input_deal | tail -1|awk '{print $1}'`
+iinterval=`expr $ietime - $istime`
+
+ibandwidth=`expr $itraffic / $iinterval`
+
+date
+echo $obandwidth
+echo $ibandwidth
+```
+问题：管道运作时执行:>以后会失效。
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
@@ -117,6 +173,69 @@ int main(int argc, char *argv[])
   return 0;
 }
 </code></pre>
+
+<ol>
+<li>complie</li>
+</ol>
+
+<pre><code>test4: test4.c
+    gcc -g -Wall -o test4 test4.c -lpcap
+</code></pre>
+
+<ol>
+<li>deal output
+E.g. 
+wget from 123.58.173.185:</li>
+</ol>
+
+<pre><code>sudo ./test4 enp0s29u1u2 "host 123.58.173.185 and dst port 80" &gt; /tmp/output
+sudo ./test4 enp0s29u1u2 "host 123.58.173.185 and src port 80" &gt; /tmp/input
+</code></pre>
+
+<pre><code>#!/bin/bash
+
+#每隔5分钟(使用定时任务)(snmp 周期)将输入截取为一个文件，累加流量除以时间差得到5分钟内平均带宽由snmp取走。
+
+mv /tmp/output /tmp/output_deal
+:&gt;/tmp/output
+
+#去掉第一行和最后一行
+
+sed -i '1d;$d' /tmp/output_deal
+
+otraffic=`cat /tmp/output_deal |awk '{print $2}'|tr "\n" "+"`
+
+otraffic=`echo ${otraffic}0|bc`
+
+ostime=`cat /tmp/output_deal | head -1|awk '{print $1}'`
+oetime=`cat /tmp/output_deal | tail -1|awk '{print $1}'`
+ointerval=`expr $oetime - $ostime`
+
+obandwidth=`expr $otraffic / $ointerval`
+
+mv /tmp/input /tmp/input_deal
+:&gt;/tmp/input
+
+#去掉第一行和最后一行
+
+sed -i '1d;$d' /tmp/input_deal
+
+itraffic=`cat /tmp/input_deal |awk '{print $2}'|tr "\n" "+"`
+
+itraffic=`echo ${itraffic}0|bc`
+
+istime=`cat /tmp/input_deal | head -1|awk '{print $1}'`
+ietime=`cat /tmp/input_deal | tail -1|awk '{print $1}'`
+iinterval=`expr $ietime - $istime`
+
+ibandwidth=`expr $itraffic / $iinterval`
+
+date
+echo $obandwidth
+echo $ibandwidth
+</code></pre>
+
+<p>问题：管道运作时执行:&gt;以后会失效。</p>
 <!-- content end -->
 </div>
 <br>
