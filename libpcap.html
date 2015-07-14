@@ -126,6 +126,60 @@ echo $ibandwidth
 问题：管道运作时执行:>以后会失效。
 可能的办法：文件处理不用shell，比如ptal使用第三个参数，为输出文件
 可能的办法：把ptal放到脚本中
+```
+#!/bin/bash
+
+#每隔5分钟(使用定时任务)(snmp 周期)将输入截取为一个文件，累加流量除以时间差得到5分钟内平均带宽由snmp取走。
+
+killall ptal
+
+if [ -f /tmp/output ] && [ -f /tmp/input ]
+then
+	echo "1"
+	mv /tmp/output /tmp/output_deal
+	mv /tmp/input /tmp/input_deal
+else 
+	echo "2"
+	/home/levinpluto/PCAP/ptal enp0s29u1u2 "host 123.58.173.186 and dst port 80" > /tmp/output &
+	/home/levinpluto/PCAP/ptal enp0s29u1u2 "host 123.58.173.186 and src port 80" > /tmp/input &
+	exit
+fi
+
+/home/levinpluto/PCAP/ptal enp0s29u1u2 "host 123.58.173.186 and dst port 80" > /tmp/output &
+/home/levinpluto/PCAP/ptal enp0s29u1u2 "host 123.58.173.186 and src port 80" > /tmp/input &
+
+#去掉第一行和最后一行
+
+sed -i '1d;$d' /tmp/output_deal
+
+otraffic=`cat /tmp/output_deal |awk '{print $2}'|tr "\n" "+"`
+
+otraffic=`echo ${otraffic}0|bc`
+
+ostime=`cat /tmp/output_deal | head -1|awk '{print $1}'`
+oetime=`cat /tmp/output_deal | tail -1|awk '{print $1}'`
+ointerval=`expr $oetime - $ostime`
+
+obandwidth=`expr $otraffic / $ointerval`
+
+#去掉第一行和最后一行
+
+sed -i '1d;$d' /tmp/input_deal
+
+itraffic=`cat /tmp/input_deal |awk '{print $2}'|tr "\n" "+"`
+
+itraffic=`echo ${itraffic}0|bc`
+
+istime=`cat /tmp/input_deal | head -1|awk '{print $1}'`
+ietime=`cat /tmp/input_deal | tail -1|awk '{print $1}'`
+iinterval=`expr $ietime - $istime`
+
+ibandwidth=`expr $itraffic / $iinterval`
+
+date
+echo $obandwidth
+echo $ibandwidth
+```
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
@@ -240,6 +294,60 @@ echo $ibandwidth
 <p>问题：管道运作时执行:&gt;以后会失效。
 可能的办法：文件处理不用shell，比如ptal使用第三个参数，为输出文件
 可能的办法：把ptal放到脚本中</p>
+
+<pre><code>#!/bin/bash
+
+#每隔5分钟(使用定时任务)(snmp 周期)将输入截取为一个文件，累加流量除以时间差得到5分钟内平均带宽由snmp取走。
+
+killall ptal
+
+if [ -f /tmp/output ] &amp;&amp; [ -f /tmp/input ]
+then
+    echo "1"
+    mv /tmp/output /tmp/output_deal
+    mv /tmp/input /tmp/input_deal
+else 
+    echo "2"
+    /home/levinpluto/PCAP/ptal enp0s29u1u2 "host 123.58.173.186 and dst port 80" &gt; /tmp/output &amp;
+    /home/levinpluto/PCAP/ptal enp0s29u1u2 "host 123.58.173.186 and src port 80" &gt; /tmp/input &amp;
+    exit
+fi
+
+/home/levinpluto/PCAP/ptal enp0s29u1u2 "host 123.58.173.186 and dst port 80" &gt; /tmp/output &amp;
+/home/levinpluto/PCAP/ptal enp0s29u1u2 "host 123.58.173.186 and src port 80" &gt; /tmp/input &amp;
+
+#去掉第一行和最后一行
+
+sed -i '1d;$d' /tmp/output_deal
+
+otraffic=`cat /tmp/output_deal |awk '{print $2}'|tr "\n" "+"`
+
+otraffic=`echo ${otraffic}0|bc`
+
+ostime=`cat /tmp/output_deal | head -1|awk '{print $1}'`
+oetime=`cat /tmp/output_deal | tail -1|awk '{print $1}'`
+ointerval=`expr $oetime - $ostime`
+
+obandwidth=`expr $otraffic / $ointerval`
+
+#去掉第一行和最后一行
+
+sed -i '1d;$d' /tmp/input_deal
+
+itraffic=`cat /tmp/input_deal |awk '{print $2}'|tr "\n" "+"`
+
+itraffic=`echo ${itraffic}0|bc`
+
+istime=`cat /tmp/input_deal | head -1|awk '{print $1}'`
+ietime=`cat /tmp/input_deal | tail -1|awk '{print $1}'`
+iinterval=`expr $ietime - $istime`
+
+ibandwidth=`expr $itraffic / $iinterval`
+
+date
+echo $obandwidth
+echo $ibandwidth
+</code></pre>
 <!-- content end -->
 </div>
 <br>
