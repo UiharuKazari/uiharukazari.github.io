@@ -26,13 +26,97 @@
 <div id="md" style="display: none;">
 <!-- markdown -->
 1. confirm libpcap(for so) and libpcap-dev(for .h) are installed.
+2. code 
+```
+#include <pcap.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+void getPacket(u_char * arg, const struct pcap_pkthdr * pkthdr, const u_char * packet)
+{
+  printf("%ld\t%d\n", pkthdr->ts.tv_sec, pkthdr->len);
+}
+
+int main(int argc, char *argv[])
+{ 
+  if(argc != 3) {
+    printf("ptal - packet time & length\n	\
+	Usage: ./ptal device \"filter\"\n	\
+	Example: ./ptal eth0 \"dst port 80\"\n");
+    exit(1);
+  }
+
+  char errBuf[PCAP_ERRBUF_SIZE];
+  
+  pcap_t * device = pcap_open_live(argv[1], 65535, 1, 0, errBuf);
+  
+  if(!device)
+  {
+    printf("error: pcap_open_live(): %s\n", errBuf);
+    exit(1);
+  }
+  
+  struct bpf_program filter;
+  pcap_compile(device, &filter, argv[2], 1, 0);
+  pcap_setfilter(device, &filter);
+  
+  int id = 0;
+  pcap_loop(device, -1, getPacket, (u_char*)&id);
+  
+  pcap_close(device);
+
+  return 0;
+}
+```
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
 <!-- content -->
 <ol>
 <li>confirm libpcap(for so) and libpcap-dev(for .h) are installed.</li>
+<li>code </li>
 </ol>
+
+<pre><code>#include &lt;pcap.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+
+void getPacket(u_char * arg, const struct pcap_pkthdr * pkthdr, const u_char * packet)
+{
+  printf("%ld\t%d\n", pkthdr-&gt;ts.tv_sec, pkthdr-&gt;len);
+}
+
+int main(int argc, char *argv[])
+{ 
+  if(argc != 3) {
+    printf("ptal - packet time &amp; length\n    \
+    Usage: ./ptal device \"filter\"\n   \
+    Example: ./ptal eth0 \"dst port 80\"\n");
+    exit(1);
+  }
+
+  char errBuf[PCAP_ERRBUF_SIZE];
+
+  pcap_t * device = pcap_open_live(argv[1], 65535, 1, 0, errBuf);
+
+  if(!device)
+  {
+    printf("error: pcap_open_live(): %s\n", errBuf);
+    exit(1);
+  }
+
+  struct bpf_program filter;
+  pcap_compile(device, &amp;filter, argv[2], 1, 0);
+  pcap_setfilter(device, &amp;filter);
+
+  int id = 0;
+  pcap_loop(device, -1, getPacket, (u_char*)&amp;id);
+
+  pcap_close(device);
+
+  return 0;
+}
+</code></pre>
 <!-- content end -->
 </div>
 <br>
