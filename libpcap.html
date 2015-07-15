@@ -279,16 +279,19 @@ fi
 #每隔5分钟(使用定时任务)(snmp 周期)将输入截取为一个文件，累加流量除以时间差得到5分钟内平均带宽由snmp取走。
 WORKPATH=/home/zfxing/bd
 
-ps -ef|grep `cat ${WORKPATH}/output$2.pid`|grep ptal
-if [[ $? -eq 0 ]]
+if [ -f ${WORKPATH}/output$2.pid ] && [ -f ${WORKPATH}/input$2.pid ]
 then
-	kill -9 `cat ${WORKPATH}/output$2.pid`
-fi
+        ps -ef|grep `cat ${WORKPATH}/output$2.pid`|grep ptal
+        if [[ $? -eq 0 ]]
+        then
+                kill -9 `cat ${WORKPATH}/output$2.pid`
+        fi
 
-ps -ef|grep `cat ${WORKPATH}/input$2.pid`|grep ptal
-if [[ $? -eq 0 ]]
-then
-	kill -9 `cat ${WORKPATH}/input$2.pid`
+        ps -ef|grep `cat ${WORKPATH}/input$2.pid`|grep ptal
+        if [[ $? -eq 0 ]]
+        then
+                kill -9 `cat ${WORKPATH}/input$2.pid`
+        fi
 fi
 
 if [ -f ${WORKPATH}/output$2 ] && [ -f ${WORKPATH}/input$2 ]
@@ -627,16 +630,19 @@ fi
 #每隔5分钟(使用定时任务)(snmp 周期)将输入截取为一个文件，累加流量除以时间差得到5分钟内平均带宽由snmp取走。
 WORKPATH=/home/zfxing/bd
 
-ps -ef|grep `cat ${WORKPATH}/output$2.pid`|grep ptal
-if [[ $? -eq 0 ]]
+if [ -f ${WORKPATH}/output$2.pid ] &amp;&amp; [ -f ${WORKPATH}/input$2.pid ]
 then
-    kill -9 `cat ${WORKPATH}/output$2.pid`
-fi
+        ps -ef|grep `cat ${WORKPATH}/output$2.pid`|grep ptal
+        if [[ $? -eq 0 ]]
+        then
+                kill -9 `cat ${WORKPATH}/output$2.pid`
+        fi
 
-ps -ef|grep `cat ${WORKPATH}/input$2.pid`|grep ptal
-if [[ $? -eq 0 ]]
-then
-    kill -9 `cat ${WORKPATH}/input$2.pid`
+        ps -ef|grep `cat ${WORKPATH}/input$2.pid`|grep ptal
+        if [[ $? -eq 0 ]]
+        then
+                kill -9 `cat ${WORKPATH}/input$2.pid`
+        fi
 fi
 
 if [ -f ${WORKPATH}/output$2 ] &amp;&amp; [ -f ${WORKPATH}/input$2 ]
