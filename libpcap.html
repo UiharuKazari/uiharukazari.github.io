@@ -180,6 +180,8 @@ date
 echo $obandwidth
 echo $ibandwidth
 ```
+问题：遇到输出重定向异常的情况
+解决：在printf后，用fflush(stdout)强制刷新缓冲
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
@@ -348,6 +350,9 @@ date
 echo $obandwidth
 echo $ibandwidth
 </code></pre>
+
+<p>问题：遇到输出重定向异常的情况
+解决：在printf后，用fflush(stdout)强制刷新缓冲</p>
 <!-- content end -->
 </div>
 <br>
