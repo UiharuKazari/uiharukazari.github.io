@@ -264,6 +264,100 @@ echo "time|output_bd|input_bd:	"`date "+%x %T"`"|"$obandwidth"|"$ibandwidth >> $
 ```
 万一响应时间超过执行周期怎么办?
 bash结束为zombie进程？
+
+bash update
+```
+#!/bin/bash
+
+if [[ $# -ne 3 ]]
+then
+	echo "Usage: bash bdn.sh <device> <port> <host>"
+	echo "Example: bash bdn.sh eth0 57644 10.1.102.4"
+	exit
+fi
+
+#每隔5分钟(使用定时任务)(snmp 周期)将输入截取为一个文件，累加流量除以时间差得到5分钟内平均带宽由snmp取走。
+WORKPATH=/home/zfxing/bd
+
+ps -ef|grep `cat ${WORKPATH}/output$2.pid`|grep ptal
+if [[ $? -eq 0 ]]
+then
+	kill -9 `cat ${WORKPATH}/output$2.pid`
+fi
+
+ps -ef|grep `cat ${WORKPATH}/input$2.pid`|grep ptal
+if [[ $? -eq 0 ]]
+then
+	kill -9 `cat ${WORKPATH}/input$2.pid`
+fi
+
+if [ -f ${WORKPATH}/output$2 ] && [ -f ${WORKPATH}/input$2 ]
+then
+    mv ${WORKPATH}/output$2 ${WORKPATH}/output_deal$2
+    mv ${WORKPATH}/input$2 ${WORKPATH}/input_deal$2
+else 
+    ${WORKPATH}/ptal $1 "src host $3 and src port $2" > ${WORKPATH}/output$2 &
+    echo $! > ${WORKPATH}/output$2.pid
+    ${WORKPATH}/ptal $1 "dst host $3 and dst port $2" > ${WORKPATH}/input$2 &
+    echo $! > ${WORKPATH}/input$2.pid
+    exit
+fi
+
+${WORKPATH}/ptal $1 "src host $3 and src port $2" > ${WORKPATH}/output$2 &
+echo $! > ${WORKPATH}/output$2.pid
+${WORKPATH}/ptal $1 "dst host $3 and dst port $2" > ${WORKPATH}/input$2 &
+echo $! > ${WORKPATH}/input$2.pid
+
+#output
+#判断，若行数小于4，则直接给出结果0；若时间间隔为0，则直接给出结果0
+
+if [[ `cat ${WORKPATH}/output_deal$2 |wc -l` -lt 4 ]]
+then
+	obandwidth=0
+else
+	sed -i '1d;$d' ${WORKPATH}/output_deal$2 #去掉第一行和最后一行
+
+	otraffic=`cat ${WORKPATH}/output_deal$2 |awk '{print $2}'|tr "\n" "+"`
+
+	otraffic=`echo ${otraffic}0|bc`
+
+	ostime=`cat ${WORKPATH}/output_deal$2 | head -1|awk '{print $1}'`
+	oetime=`cat ${WORKPATH}/output_deal$2 | tail -1|awk '{print $1}'`
+	ointerval=`expr $oetime - $ostime`
+
+	if [[ $ointerval -eq 0 ]]
+	then
+		obandwidth=0
+	else
+		obandwidth=`expr $otraffic / $ointerval`
+	fi
+fi
+
+#input
+if [[ `cat ${WORKPATH}/input_deal$2 |wc -l` -lt 4 ]]
+then
+	ibandwidth=0
+else
+	sed -i '1d;$d' ${WORKPATH}/input_deal$2
+
+	itraffic=`cat ${WORKPATH}/input_deal$2 |awk '{print $2}'|tr "\n" "+"`
+
+	itraffic=`echo ${itraffic}0|bc`
+
+	istime=`cat ${WORKPATH}/input_deal$2 | head -1|awk '{print $1}'`
+	ietime=`cat ${WORKPATH}/input_deal$2 | tail -1|awk '{print $1}'`
+	iinterval=`expr $ietime - $istime`
+
+	if [[ $iinterval -eq 0 ]]
+	then
+		ibandwidth=0
+	else
+		ibandwidth=`expr $itraffic / $iinterval`
+	fi
+fi
+
+echo "time|output_bd|input_bd:	"`date "+%x %T"`"|"$obandwidth"|"$ibandwidth >> ${WORKPATH}/res$2.log
+```
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
@@ -518,6 +612,100 @@ echo "time|output_bd|input_bd:    "`date "+%x %T"`"|"$obandwidth"|"$ibandwidth &
 
 <p>万一响应时间超过执行周期怎么办?
 bash结束为zombie进程？</p>
+
+<p>bash update</p>
+
+<pre><code>#!/bin/bash
+
+if [[ $# -ne 3 ]]
+then
+    echo "Usage: bash bdn.sh &lt;device&gt; &lt;port&gt; &lt;host&gt;"
+    echo "Example: bash bdn.sh eth0 57644 10.1.102.4"
+    exit
+fi
+
+#每隔5分钟(使用定时任务)(snmp 周期)将输入截取为一个文件，累加流量除以时间差得到5分钟内平均带宽由snmp取走。
+WORKPATH=/home/zfxing/bd
+
+ps -ef|grep `cat ${WORKPATH}/output$2.pid`|grep ptal
+if [[ $? -eq 0 ]]
+then
+    kill -9 `cat ${WORKPATH}/output$2.pid`
+fi
+
+ps -ef|grep `cat ${WORKPATH}/input$2.pid`|grep ptal
+if [[ $? -eq 0 ]]
+then
+    kill -9 `cat ${WORKPATH}/input$2.pid`
+fi
+
+if [ -f ${WORKPATH}/output$2 ] &amp;&amp; [ -f ${WORKPATH}/input$2 ]
+then
+    mv ${WORKPATH}/output$2 ${WORKPATH}/output_deal$2
+    mv ${WORKPATH}/input$2 ${WORKPATH}/input_deal$2
+else 
+    ${WORKPATH}/ptal $1 "src host $3 and src port $2" &gt; ${WORKPATH}/output$2 &amp;
+    echo $! &gt; ${WORKPATH}/output$2.pid
+    ${WORKPATH}/ptal $1 "dst host $3 and dst port $2" &gt; ${WORKPATH}/input$2 &amp;
+    echo $! &gt; ${WORKPATH}/input$2.pid
+    exit
+fi
+
+${WORKPATH}/ptal $1 "src host $3 and src port $2" &gt; ${WORKPATH}/output$2 &amp;
+echo $! &gt; ${WORKPATH}/output$2.pid
+${WORKPATH}/ptal $1 "dst host $3 and dst port $2" &gt; ${WORKPATH}/input$2 &amp;
+echo $! &gt; ${WORKPATH}/input$2.pid
+
+#output
+#判断，若行数小于4，则直接给出结果0；若时间间隔为0，则直接给出结果0
+
+if [[ `cat ${WORKPATH}/output_deal$2 |wc -l` -lt 4 ]]
+then
+    obandwidth=0
+else
+    sed -i '1d;$d' ${WORKPATH}/output_deal$2 #去掉第一行和最后一行
+
+    otraffic=`cat ${WORKPATH}/output_deal$2 |awk '{print $2}'|tr "\n" "+"`
+
+    otraffic=`echo ${otraffic}0|bc`
+
+    ostime=`cat ${WORKPATH}/output_deal$2 | head -1|awk '{print $1}'`
+    oetime=`cat ${WORKPATH}/output_deal$2 | tail -1|awk '{print $1}'`
+    ointerval=`expr $oetime - $ostime`
+
+    if [[ $ointerval -eq 0 ]]
+    then
+        obandwidth=0
+    else
+        obandwidth=`expr $otraffic / $ointerval`
+    fi
+fi
+
+#input
+if [[ `cat ${WORKPATH}/input_deal$2 |wc -l` -lt 4 ]]
+then
+    ibandwidth=0
+else
+    sed -i '1d;$d' ${WORKPATH}/input_deal$2
+
+    itraffic=`cat ${WORKPATH}/input_deal$2 |awk '{print $2}'|tr "\n" "+"`
+
+    itraffic=`echo ${itraffic}0|bc`
+
+    istime=`cat ${WORKPATH}/input_deal$2 | head -1|awk '{print $1}'`
+    ietime=`cat ${WORKPATH}/input_deal$2 | tail -1|awk '{print $1}'`
+    iinterval=`expr $ietime - $istime`
+
+    if [[ $iinterval -eq 0 ]]
+    then
+        ibandwidth=0
+    else
+        ibandwidth=`expr $itraffic / $iinterval`
+    fi
+fi
+
+echo "time|output_bd|input_bd:    "`date "+%x %T"`"|"$obandwidth"|"$ibandwidth &gt;&gt; ${WORKPATH}/res$2.log
+</code></pre>
 <!-- content end -->
 </div>
 <br>
