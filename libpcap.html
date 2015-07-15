@@ -189,8 +189,8 @@ echo $ibandwidth
 
 if [[ $# -ne 2 ]]
 then
-	echo "Usage: bash bdn.sh <device> <port>"
-	echo "Example: bash bdn.sh eth0 57644"
+	echo "Usage: bash bdn.sh <device> <port> <host>"
+	echo "Example: bash bdn.sh eth0 57644 10.1.102.4"
 	exit
 fi
 
@@ -204,13 +204,13 @@ then
     mv ${WORKPATH}/output$2 ${WORKPATH}/output_deal$2
     mv ${WORKPATH}/input$2 ${WORKPATH}/input_deal$2
 else 
-    ${WORKPATH}/ptal $1 "src host 10.1.102.4 and src port $2" > ${WORKPATH}/output$2 &
-    ${WORKPATH}/ptal $1 "dst host 10.1.102.4 and dst port $2" > ${WORKPATH}/input$2 &
+    ${WORKPATH}/ptal $1 "src host $3 and src port $2" > ${WORKPATH}/output$2 &
+    ${WORKPATH}/ptal $1 "dst host $3 and dst port $2" > ${WORKPATH}/input$2 &
     exit
 fi
 
-${WORKPATH}/ptal $1 "src host 10.1.102.4 and src port $2" > ${WORKPATH}/output$2 &
-${WORKPATH}/ptal $1 "dst host 10.1.102.4 and dst port $2" > ${WORKPATH}/input$2 &
+${WORKPATH}/ptal $1 "src host $3 and src port $2" > ${WORKPATH}/output$2 &
+${WORKPATH}/ptal $1 "dst host $3 and dst port $2" > ${WORKPATH}/input$2 &
 
 #output
 #判断，若行数小于4，则直接给出结果0；若时间间隔为0，则直接给出结果0
@@ -440,8 +440,8 @@ echo $ibandwidth
 
 if [[ $# -ne 2 ]]
 then
-    echo "Usage: bash bdn.sh &lt;device&gt; &lt;port&gt;"
-    echo "Example: bash bdn.sh eth0 57644"
+    echo "Usage: bash bdn.sh &lt;device&gt; &lt;port&gt; &lt;host&gt;"
+    echo "Example: bash bdn.sh eth0 57644 10.1.102.4"
     exit
 fi
 
@@ -455,13 +455,13 @@ then
     mv ${WORKPATH}/output$2 ${WORKPATH}/output_deal$2
     mv ${WORKPATH}/input$2 ${WORKPATH}/input_deal$2
 else 
-    ${WORKPATH}/ptal $1 "src host 10.1.102.4 and src port $2" &gt; ${WORKPATH}/output$2 &amp;
-    ${WORKPATH}/ptal $1 "dst host 10.1.102.4 and dst port $2" &gt; ${WORKPATH}/input$2 &amp;
+    ${WORKPATH}/ptal $1 "src host $3 and src port $2" &gt; ${WORKPATH}/output$2 &amp;
+    ${WORKPATH}/ptal $1 "dst host $3 and dst port $2" &gt; ${WORKPATH}/input$2 &amp;
     exit
 fi
 
-${WORKPATH}/ptal $1 "src host 10.1.102.4 and src port $2" &gt; ${WORKPATH}/output$2 &amp;
-${WORKPATH}/ptal $1 "dst host 10.1.102.4 and dst port $2" &gt; ${WORKPATH}/input$2 &amp;
+${WORKPATH}/ptal $1 "src host $3 and src port $2" &gt; ${WORKPATH}/output$2 &amp;
+${WORKPATH}/ptal $1 "dst host $3 and dst port $2" &gt; ${WORKPATH}/input$2 &amp;
 
 #output
 #判断，若行数小于4，则直接给出结果0；若时间间隔为0，则直接给出结果0
