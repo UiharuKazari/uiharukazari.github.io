@@ -25,9 +25,11 @@
 	</div>
 <div id="md" style="display: none;">
 <!-- markdown -->
-1. confirm libpcap(for so) and libpcap-dev(for .h) are installed.
-2. code 
-```
+###1. preparation
+confirm `libpcap`(for so) and `libpcap-dev`(for .h) are installed.
+###2. c code
+`ptal.c`:
+~~~~{c}
 #include <pcap.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -68,205 +70,22 @@ int main(int argc, char *argv[])
 
   return 0;
 }
+~~~~
+
+###3. complie
 ```
-3. complie
+ptal: ptal.c
+	gcc -g -Wall -o ptal ptal.c -lpcap
 ```
-test4: test4.c
-	gcc -g -Wall -o test4 test4.c -lpcap
-```
-4. deal output
-E.g. 
+###4. deal output
+e.g. 
 wget from 123.58.173.185:
 ```
-sudo ./test4 enp0s29u1u2 "host 123.58.173.185 and dst port 80" > /tmp/output
-sudo ./test4 enp0s29u1u2 "host 123.58.173.185 and src port 80" > /tmp/input
+sudo ./ptal enp0s29u1u2 "host 123.58.173.185 and dst port 80" > /tmp/output
+sudo ./ptal enp0s29u1u2 "host 123.58.173.185 and src port 80" > /tmp/input
 ```
-```
-#!/bin/bash
-
-#每隔5分钟(使用定时任务)(snmp 周期)将输入截取为一个文件，累加流量除以时间差得到5分钟内平均带宽由snmp取走。
-
-mv /tmp/output /tmp/output_deal
-:>/tmp/output
-
-#去掉第一行和最后一行
-
-sed -i '1d;$d' /tmp/output_deal
-
-otraffic=`cat /tmp/output_deal |awk '{print $2}'|tr "\n" "+"`
-
-otraffic=`echo ${otraffic}0|bc`
-
-ostime=`cat /tmp/output_deal | head -1|awk '{print $1}'`
-oetime=`cat /tmp/output_deal | tail -1|awk '{print $1}'`
-ointerval=`expr $oetime - $ostime`
-
-obandwidth=`expr $otraffic / $ointerval`
-
-mv /tmp/input /tmp/input_deal
-:>/tmp/input
-
-#去掉第一行和最后一行
-
-sed -i '1d;$d' /tmp/input_deal
-
-itraffic=`cat /tmp/input_deal |awk '{print $2}'|tr "\n" "+"`
-
-itraffic=`echo ${itraffic}0|bc`
-
-istime=`cat /tmp/input_deal | head -1|awk '{print $1}'`
-ietime=`cat /tmp/input_deal | tail -1|awk '{print $1}'`
-iinterval=`expr $ietime - $istime`
-
-ibandwidth=`expr $itraffic / $iinterval`
-
-date
-echo $obandwidth
-echo $ibandwidth
-```
-问题：管道运作时执行:>以后会失效。
-可能的办法：文件处理不用shell，比如ptal使用第三个参数，为输出文件
-可能的办法：把ptal放到脚本中
-```
-#!/bin/bash
-
-#每隔5分钟(使用定时任务)(snmp 周期)将输入截取为一个文件，累加流量除以时间差得到5分钟内平均带宽由snmp取走。
-
-killall ptal
-
-if [ -f /tmp/output ] && [ -f /tmp/input ]
-then
-	echo "1"
-	mv /tmp/output /tmp/output_deal
-	mv /tmp/input /tmp/input_deal
-else 
-	echo "2"
-	/home/levinpluto/PCAP/ptal enp0s29u1u2 "host 123.58.173.186 and dst port 80" > /tmp/output &
-	/home/levinpluto/PCAP/ptal enp0s29u1u2 "host 123.58.173.186 and src port 80" > /tmp/input &
-	exit
-fi
-
-/home/levinpluto/PCAP/ptal enp0s29u1u2 "host 123.58.173.186 and dst port 80" > /tmp/output &
-/home/levinpluto/PCAP/ptal enp0s29u1u2 "host 123.58.173.186 and src port 80" > /tmp/input &
-
-#去掉第一行和最后一行
-
-sed -i '1d;$d' /tmp/output_deal
-
-otraffic=`cat /tmp/output_deal |awk '{print $2}'|tr "\n" "+"`
-
-otraffic=`echo ${otraffic}0|bc`
-
-ostime=`cat /tmp/output_deal | head -1|awk '{print $1}'`
-oetime=`cat /tmp/output_deal | tail -1|awk '{print $1}'`
-ointerval=`expr $oetime - $ostime`
-
-obandwidth=`expr $otraffic / $ointerval`
-
-#去掉第一行和最后一行
-
-sed -i '1d;$d' /tmp/input_deal
-
-itraffic=`cat /tmp/input_deal |awk '{print $2}'|tr "\n" "+"`
-
-itraffic=`echo ${itraffic}0|bc`
-
-istime=`cat /tmp/input_deal | head -1|awk '{print $1}'`
-ietime=`cat /tmp/input_deal | tail -1|awk '{print $1}'`
-iinterval=`expr $ietime - $istime`
-
-ibandwidth=`expr $itraffic / $iinterval`
-
-date
-echo $obandwidth
-echo $ibandwidth
-```
-问题：遇到输出重定向异常的情况
-解决：在printf后，用fflush(stdout)强制刷新缓冲
-最新版的bash:
-```
-#!/bin/bash
-
-if [[ $# -ne 2 ]]
-then
-	echo "Usage: bash bdn.sh <device> <port> <host>"
-	echo "Example: bash bdn.sh eth0 57644 10.1.102.4"
-	exit
-fi
-
-#每隔5分钟(使用定时任务)(snmp 周期)将输入截取为一个文件，累加流量除以时间差得到5分钟内平均带宽由snmp取走。
-WORKPATH=/home/zfxing/bd
-
-killall ptal #FIXME 若监听多个端口 会把其他进程杀了(考虑记录进程号)
-
-if [ -f ${WORKPATH}/output$2 ] && [ -f ${WORKPATH}/input$2 ]
-then
-    mv ${WORKPATH}/output$2 ${WORKPATH}/output_deal$2
-    mv ${WORKPATH}/input$2 ${WORKPATH}/input_deal$2
-else 
-    ${WORKPATH}/ptal $1 "src host $3 and src port $2" > ${WORKPATH}/output$2 &
-    ${WORKPATH}/ptal $1 "dst host $3 and dst port $2" > ${WORKPATH}/input$2 &
-    exit
-fi
-
-${WORKPATH}/ptal $1 "src host $3 and src port $2" > ${WORKPATH}/output$2 &
-${WORKPATH}/ptal $1 "dst host $3 and dst port $2" > ${WORKPATH}/input$2 &
-
-#output
-#判断，若行数小于4，则直接给出结果0；若时间间隔为0，则直接给出结果0
-
-if [[ `cat ${WORKPATH}/output_deal$2 |wc -l` -lt 4 ]]
-then
-	obandwidth=0
-else
-	sed -i '1d;$d' ${WORKPATH}/output_deal$2 #去掉第一行和最后一行
-
-	otraffic=`cat ${WORKPATH}/output_deal$2 |awk '{print $2}'|tr "\n" "+"`
-
-	otraffic=`echo ${otraffic}0|bc`
-
-	ostime=`cat ${WORKPATH}/output_deal$2 | head -1|awk '{print $1}'`
-	oetime=`cat ${WORKPATH}/output_deal$2 | tail -1|awk '{print $1}'`
-	ointerval=`expr $oetime - $ostime`
-
-	if [[ $ointerval -eq 0 ]]
-	then
-		obandwidth=0
-	else
-		obandwidth=`expr $otraffic / $ointerval`
-	fi
-fi
-
-#input
-if [[ `cat ${WORKPATH}/input_deal$2 |wc -l` -lt 4 ]]
-then
-	ibandwidth=0
-else
-	sed -i '1d;$d' ${WORKPATH}/input_deal$2
-
-	itraffic=`cat ${WORKPATH}/input_deal$2 |awk '{print $2}'|tr "\n" "+"`
-
-	itraffic=`echo ${itraffic}0|bc`
-
-	istime=`cat ${WORKPATH}/input_deal$2 | head -1|awk '{print $1}'`
-	ietime=`cat ${WORKPATH}/input_deal$2 | tail -1|awk '{print $1}'`
-	iinterval=`expr $ietime - $istime`
-
-	if [[ $iinterval -eq 0 ]]
-	then
-		ibandwidth=0
-	else
-		ibandwidth=`expr $itraffic / $iinterval`
-	fi
-fi
-
-echo "time|output_bd|input_bd:	"`date "+%x %T"`"|"$obandwidth"|"$ibandwidth >> ${WORKPATH}/res$2.log
-```
-万一响应时间超过执行周期怎么办?
-bash结束为zombie进程？
-
-bash update
-```
+bash script:
+~~~~{bash}
 #!/bin/bash
 
 if [[ $# -ne 3 ]]
@@ -360,357 +179,172 @@ else
 fi
 
 echo "time|output_bd|input_bd:	"`date "+%x %T"`"|"$obandwidth"|"$ibandwidth >> ${WORKPATH}/res$2.log
-```
+~~~~
+
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
 <!-- content -->
-<ol>
-<li>confirm libpcap(for so) and libpcap-dev(for .h) are installed.</li>
-<li>code </li>
-</ol>
+<h3 id="1preparation">1. preparation</h3>
 
-<pre><code>#include &lt;pcap.h&gt;
-#include &lt;stdlib.h&gt;
-#include &lt;stdio.h&gt;
+<p>confirm <code>libpcap</code>(for so) and <code>libpcap-dev</code>(for .h) are installed.</p>
 
-void getPacket(u_char * arg, const struct pcap_pkthdr * pkthdr, const u_char * packet)
-{
-  printf("%ld\t%d\n", pkthdr-&gt;ts.tv_sec, pkthdr-&gt;len);
-  fflush(stdout); //FIXME force flush
-}
+<h3 id="2ccode">2. c code</h3>
 
-int main(int argc, char *argv[])
-{ 
-  if(argc != 3) {
-    printf("ptal - packet time &amp; length\n    \
-    Usage: ./ptal device \"filter\"\n   \
-    Example: ./ptal eth0 \"dst port 80\"\n");
-    exit(1);
-  }
+<p><code>ptal.c</code>:</p>
 
-  char errBuf[PCAP_ERRBUF_SIZE];
+<pre class=" language-c"><code class=" language-c"><span class="token property">#include <span class="token property">&lt;pcap.h&gt;</span></span>
+<span class="token property">#include <span class="token property">&lt;stdlib.h&gt;</span></span>
+<span class="token property">#include <span class="token property">&lt;stdio.h&gt;</span></span>
 
-  pcap_t * device = pcap_open_live(argv[1], 65535, 1, 0, errBuf);
+<span class="token keyword">void</span> <span class="token function">getPacket<span class="token punctuation">(</span></span>u_char <span class="token operator">*</span> arg<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">struct</span> pcap_pkthdr <span class="token operator">*</span> pkthdr<span class="token punctuation">,</span> <span class="token keyword">const</span> u_char <span class="token operator">*</span> packet<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token function">printf<span class="token punctuation">(</span></span><span class="token string">"%ld\t%d\n"</span><span class="token punctuation">,</span> pkthdr<span class="token operator">-</span>&gt;ts<span class="token punctuation">.</span>tv_sec<span class="token punctuation">,</span> pkthdr<span class="token operator">-</span>&gt;len<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">fflush<span class="token punctuation">(</span></span>stdout<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true"> //FIXME force flush
+</span><span class="token punctuation">}</span>
 
-  if(!device)
-  {
-    printf("error: pcap_open_live(): %s\n", errBuf);
-    exit(1);
-  }
+<span class="token keyword">int</span> <span class="token function">main<span class="token punctuation">(</span></span><span class="token keyword">int</span> argc<span class="token punctuation">,</span> <span class="token keyword">char</span> <span class="token operator">*</span>argv<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span> 
+  <span class="token keyword">if</span><span class="token punctuation">(</span>argc <span class="token operator">!=</span> <span class="token number">3</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">printf<span class="token punctuation">(</span></span>"ptal <span class="token operator">-</span> packet time <span class="token operator">&amp;</span> length\n    \
+    Usage<span class="token punctuation">:</span> <span class="token punctuation">.</span><span class="token operator">/</span>ptal device \<span class="token string">"filter\"</span>\n   \
+    Example<span class="token punctuation">:</span> <span class="token punctuation">.</span><span class="token operator">/</span>ptal eth0 \<span class="token string">"dst port 80\"\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">exit<span class="token punctuation">(</span></span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
 
-  struct bpf_program filter;
-  pcap_compile(device, &amp;filter, argv[2], 1, 0);
-  pcap_setfilter(device, &amp;filter);
+  <span class="token keyword">char</span> errBuf<span class="token punctuation">[</span>PCAP_ERRBUF_SIZE<span class="token punctuation">]</span><span class="token punctuation">;</span>
 
-  int id = 0;
-  pcap_loop(device, -1, getPacket, (u_char*)&amp;id);
+  pcap_t <span class="token operator">*</span> device <span class="token operator">=</span> <span class="token function">pcap_open_live<span class="token punctuation">(</span></span>argv<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token number">65535</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> errBuf<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-  pcap_close(device);
+  <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>device<span class="token punctuation">)</span>
+  <span class="token punctuation">{</span>
+    <span class="token function">printf<span class="token punctuation">(</span></span><span class="token string">"error: pcap_open_live(): %s\n"</span><span class="token punctuation">,</span> errBuf<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">exit<span class="token punctuation">(</span></span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
 
-  return 0;
-}
+  <span class="token keyword">struct</span> bpf_program filter<span class="token punctuation">;</span>
+  <span class="token function">pcap_compile<span class="token punctuation">(</span></span>device<span class="token punctuation">,</span> <span class="token operator">&amp;</span>filter<span class="token punctuation">,</span> argv<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">pcap_setfilter<span class="token punctuation">(</span></span>device<span class="token punctuation">,</span> <span class="token operator">&amp;</span>filter<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">int</span> id <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+  <span class="token function">pcap_loop<span class="token punctuation">(</span></span>device<span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> getPacket<span class="token punctuation">,</span> <span class="token punctuation">(</span>u_char<span class="token operator">*</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">pcap_close<span class="token punctuation">(</span></span>device<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 </code></pre>
 
-<ol>
-<li>complie</li>
-</ol>
+<h3 id="3complie">3. complie</h3>
 
-<pre><code>test4: test4.c
-    gcc -g -Wall -o test4 test4.c -lpcap
+<pre><code>ptal: ptal.c
+    gcc -g -Wall -o ptal ptal.c -lpcap
 </code></pre>
 
-<ol>
-<li>deal output
-E.g. 
-wget from 123.58.173.185:</li>
-</ol>
+<h3 id="4dealoutput">4. deal output</h3>
 
-<pre><code>sudo ./test4 enp0s29u1u2 "host 123.58.173.185 and dst port 80" &gt; /tmp/output
-sudo ./test4 enp0s29u1u2 "host 123.58.173.185 and src port 80" &gt; /tmp/input
+<p>e.g. 
+wget from 123.58.173.185:</p>
+
+<pre><code>sudo ./ptal enp0s29u1u2 "host 123.58.173.185 and dst port 80" &gt; /tmp/output
+sudo ./ptal enp0s29u1u2 "host 123.58.173.185 and src port 80" &gt; /tmp/input
 </code></pre>
 
-<pre><code>#!/bin/bash
-
-#每隔5分钟(使用定时任务)(snmp 周期)将输入截取为一个文件，累加流量除以时间差得到5分钟内平均带宽由snmp取走。
-
-mv /tmp/output /tmp/output_deal
-:&gt;/tmp/output
-
-#去掉第一行和最后一行
-
-sed -i '1d;$d' /tmp/output_deal
-
-otraffic=`cat /tmp/output_deal |awk '{print $2}'|tr "\n" "+"`
-
-otraffic=`echo ${otraffic}0|bc`
-
-ostime=`cat /tmp/output_deal | head -1|awk '{print $1}'`
-oetime=`cat /tmp/output_deal | tail -1|awk '{print $1}'`
-ointerval=`expr $oetime - $ostime`
-
-obandwidth=`expr $otraffic / $ointerval`
-
-mv /tmp/input /tmp/input_deal
-:&gt;/tmp/input
-
-#去掉第一行和最后一行
-
-sed -i '1d;$d' /tmp/input_deal
-
-itraffic=`cat /tmp/input_deal |awk '{print $2}'|tr "\n" "+"`
-
-itraffic=`echo ${itraffic}0|bc`
-
-istime=`cat /tmp/input_deal | head -1|awk '{print $1}'`
-ietime=`cat /tmp/input_deal | tail -1|awk '{print $1}'`
-iinterval=`expr $ietime - $istime`
-
-ibandwidth=`expr $itraffic / $iinterval`
-
-date
-echo $obandwidth
-echo $ibandwidth
-</code></pre>
-
-<p>问题：管道运作时执行:&gt;以后会失效。
-可能的办法：文件处理不用shell，比如ptal使用第三个参数，为输出文件
-可能的办法：把ptal放到脚本中</p>
-
-<pre><code>#!/bin/bash
-
-#每隔5分钟(使用定时任务)(snmp 周期)将输入截取为一个文件，累加流量除以时间差得到5分钟内平均带宽由snmp取走。
-
-killall ptal
-
-if [ -f /tmp/output ] &amp;&amp; [ -f /tmp/input ]
-then
-    echo "1"
-    mv /tmp/output /tmp/output_deal
-    mv /tmp/input /tmp/input_deal
-else 
-    echo "2"
-    /home/levinpluto/PCAP/ptal enp0s29u1u2 "host 123.58.173.186 and dst port 80" &gt; /tmp/output &amp;
-    /home/levinpluto/PCAP/ptal enp0s29u1u2 "host 123.58.173.186 and src port 80" &gt; /tmp/input &amp;
-    exit
-fi
-
-/home/levinpluto/PCAP/ptal enp0s29u1u2 "host 123.58.173.186 and dst port 80" &gt; /tmp/output &amp;
-/home/levinpluto/PCAP/ptal enp0s29u1u2 "host 123.58.173.186 and src port 80" &gt; /tmp/input &amp;
-
-#去掉第一行和最后一行
-
-sed -i '1d;$d' /tmp/output_deal
-
-otraffic=`cat /tmp/output_deal |awk '{print $2}'|tr "\n" "+"`
-
-otraffic=`echo ${otraffic}0|bc`
-
-ostime=`cat /tmp/output_deal | head -1|awk '{print $1}'`
-oetime=`cat /tmp/output_deal | tail -1|awk '{print $1}'`
-ointerval=`expr $oetime - $ostime`
-
-obandwidth=`expr $otraffic / $ointerval`
-
-#去掉第一行和最后一行
-
-sed -i '1d;$d' /tmp/input_deal
-
-itraffic=`cat /tmp/input_deal |awk '{print $2}'|tr "\n" "+"`
-
-itraffic=`echo ${itraffic}0|bc`
-
-istime=`cat /tmp/input_deal | head -1|awk '{print $1}'`
-ietime=`cat /tmp/input_deal | tail -1|awk '{print $1}'`
-iinterval=`expr $ietime - $istime`
-
-ibandwidth=`expr $itraffic / $iinterval`
-
-date
-echo $obandwidth
-echo $ibandwidth
-</code></pre>
-
-<p>问题：遇到输出重定向异常的情况
-解决：在printf后，用fflush(stdout)强制刷新缓冲
-最新版的bash:</p>
-
-<pre><code>#!/bin/bash
-
-if [[ $# -ne 2 ]]
-then
-    echo "Usage: bash bdn.sh &lt;device&gt; &lt;port&gt; &lt;host&gt;"
-    echo "Example: bash bdn.sh eth0 57644 10.1.102.4"
-    exit
-fi
-
-#每隔5分钟(使用定时任务)(snmp 周期)将输入截取为一个文件，累加流量除以时间差得到5分钟内平均带宽由snmp取走。
-WORKPATH=/home/zfxing/bd
-
-killall ptal #FIXME 若监听多个端口 会把其他进程杀了(考虑记录进程号)
-
-if [ -f ${WORKPATH}/output$2 ] &amp;&amp; [ -f ${WORKPATH}/input$2 ]
-then
-    mv ${WORKPATH}/output$2 ${WORKPATH}/output_deal$2
-    mv ${WORKPATH}/input$2 ${WORKPATH}/input_deal$2
-else 
-    ${WORKPATH}/ptal $1 "src host $3 and src port $2" &gt; ${WORKPATH}/output$2 &amp;
-    ${WORKPATH}/ptal $1 "dst host $3 and dst port $2" &gt; ${WORKPATH}/input$2 &amp;
-    exit
-fi
-
-${WORKPATH}/ptal $1 "src host $3 and src port $2" &gt; ${WORKPATH}/output$2 &amp;
-${WORKPATH}/ptal $1 "dst host $3 and dst port $2" &gt; ${WORKPATH}/input$2 &amp;
-
-#output
-#判断，若行数小于4，则直接给出结果0；若时间间隔为0，则直接给出结果0
-
-if [[ `cat ${WORKPATH}/output_deal$2 |wc -l` -lt 4 ]]
-then
-    obandwidth=0
-else
-    sed -i '1d;$d' ${WORKPATH}/output_deal$2 #去掉第一行和最后一行
-
-    otraffic=`cat ${WORKPATH}/output_deal$2 |awk '{print $2}'|tr "\n" "+"`
-
-    otraffic=`echo ${otraffic}0|bc`
-
-    ostime=`cat ${WORKPATH}/output_deal$2 | head -1|awk '{print $1}'`
-    oetime=`cat ${WORKPATH}/output_deal$2 | tail -1|awk '{print $1}'`
-    ointerval=`expr $oetime - $ostime`
-
-    if [[ $ointerval -eq 0 ]]
-    then
-        obandwidth=0
-    else
-        obandwidth=`expr $otraffic / $ointerval`
-    fi
-fi
-
-#input
-if [[ `cat ${WORKPATH}/input_deal$2 |wc -l` -lt 4 ]]
-then
-    ibandwidth=0
-else
-    sed -i '1d;$d' ${WORKPATH}/input_deal$2
-
-    itraffic=`cat ${WORKPATH}/input_deal$2 |awk '{print $2}'|tr "\n" "+"`
-
-    itraffic=`echo ${itraffic}0|bc`
-
-    istime=`cat ${WORKPATH}/input_deal$2 | head -1|awk '{print $1}'`
-    ietime=`cat ${WORKPATH}/input_deal$2 | tail -1|awk '{print $1}'`
-    iinterval=`expr $ietime - $istime`
-
-    if [[ $iinterval -eq 0 ]]
-    then
-        ibandwidth=0
-    else
-        ibandwidth=`expr $itraffic / $iinterval`
-    fi
-fi
-
-echo "time|output_bd|input_bd:    "`date "+%x %T"`"|"$obandwidth"|"$ibandwidth &gt;&gt; ${WORKPATH}/res$2.log
-</code></pre>
-
-<p>万一响应时间超过执行周期怎么办?
-bash结束为zombie进程？</p>
-
-<p>bash update</p>
-
-<pre><code>#!/bin/bash
-
-if [[ $# -ne 3 ]]
-then
-    echo "Usage: bash bdn.sh &lt;device&gt; &lt;port&gt; &lt;host&gt;"
-    echo "Example: bash bdn.sh eth0 57644 10.1.102.4"
-    exit
-fi
-
-#每隔5分钟(使用定时任务)(snmp 周期)将输入截取为一个文件，累加流量除以时间差得到5分钟内平均带宽由snmp取走。
-WORKPATH=/home/zfxing/bd
-
-if [ -f ${WORKPATH}/output$2.pid ] &amp;&amp; [ -f ${WORKPATH}/input$2.pid ]
-then
-        ps -ef|grep `cat ${WORKPATH}/output$2.pid`|grep ptal
-        if [[ $? -eq 0 ]]
-        then
-                kill -9 `cat ${WORKPATH}/output$2.pid`
-        fi
-
-        ps -ef|grep `cat ${WORKPATH}/input$2.pid`|grep ptal
-        if [[ $? -eq 0 ]]
-        then
-                kill -9 `cat ${WORKPATH}/input$2.pid`
-        fi
-fi
-
-if [ -f ${WORKPATH}/output$2 ] &amp;&amp; [ -f ${WORKPATH}/input$2 ]
-then
-    mv ${WORKPATH}/output$2 ${WORKPATH}/output_deal$2
-    mv ${WORKPATH}/input$2 ${WORKPATH}/input_deal$2
-else 
-    ${WORKPATH}/ptal $1 "src host $3 and src port $2" &gt; ${WORKPATH}/output$2 &amp;
-    echo $! &gt; ${WORKPATH}/output$2.pid
-    ${WORKPATH}/ptal $1 "dst host $3 and dst port $2" &gt; ${WORKPATH}/input$2 &amp;
-    echo $! &gt; ${WORKPATH}/input$2.pid
-    exit
-fi
-
-${WORKPATH}/ptal $1 "src host $3 and src port $2" &gt; ${WORKPATH}/output$2 &amp;
-echo $! &gt; ${WORKPATH}/output$2.pid
-${WORKPATH}/ptal $1 "dst host $3 and dst port $2" &gt; ${WORKPATH}/input$2 &amp;
-echo $! &gt; ${WORKPATH}/input$2.pid
-
-#output
-#判断，若行数小于4，则直接给出结果0；若时间间隔为0，则直接给出结果0
-
-if [[ `cat ${WORKPATH}/output_deal$2 |wc -l` -lt 4 ]]
-then
-    obandwidth=0
-else
-    sed -i '1d;$d' ${WORKPATH}/output_deal$2 #去掉第一行和最后一行
-
-    otraffic=`cat ${WORKPATH}/output_deal$2 |awk '{print $2}'|tr "\n" "+"`
-
-    otraffic=`echo ${otraffic}0|bc`
-
-    ostime=`cat ${WORKPATH}/output_deal$2 | head -1|awk '{print $1}'`
-    oetime=`cat ${WORKPATH}/output_deal$2 | tail -1|awk '{print $1}'`
-    ointerval=`expr $oetime - $ostime`
-
-    if [[ $ointerval -eq 0 ]]
-    then
-        obandwidth=0
-    else
-        obandwidth=`expr $otraffic / $ointerval`
-    fi
-fi
-
-#input
-if [[ `cat ${WORKPATH}/input_deal$2 |wc -l` -lt 4 ]]
-then
-    ibandwidth=0
-else
-    sed -i '1d;$d' ${WORKPATH}/input_deal$2
-
-    itraffic=`cat ${WORKPATH}/input_deal$2 |awk '{print $2}'|tr "\n" "+"`
-
-    itraffic=`echo ${itraffic}0|bc`
-
-    istime=`cat ${WORKPATH}/input_deal$2 | head -1|awk '{print $1}'`
-    ietime=`cat ${WORKPATH}/input_deal$2 | tail -1|awk '{print $1}'`
-    iinterval=`expr $ietime - $istime`
-
-    if [[ $iinterval -eq 0 ]]
-    then
-        ibandwidth=0
-    else
-        ibandwidth=`expr $itraffic / $iinterval`
-    fi
-fi
-
-echo "time|output_bd|input_bd:    "`date "+%x %T"`"|"$obandwidth"|"$ibandwidth &gt;&gt; ${WORKPATH}/res$2.log
+<p>bash script:</p>
+
+<pre class=" language-bash"><code class=" language-bash"><span class="token important">#!/bin/bash</span>
+
+<span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> $<span class="token comment" spellcheck="true"># -ne 3 ]]
+</span><span class="token keyword">then</span>
+    <span class="token keyword">echo</span> <span class="token string">"Usage: bash bdn.sh &lt;device&gt; &lt;port&gt; &lt;host&gt;"</span>
+    <span class="token keyword">echo</span> <span class="token string">"Example: bash bdn.sh eth0 57644 10.1.102.4"</span>
+    <span class="token keyword">exit</span>
+<span class="token keyword">fi</span>
+
+<span class="token comment" spellcheck="true">#每隔5分钟(使用定时任务)(snmp 周期)将输入截取为一个文件，累加流量除以时间差得到5分钟内平均带宽由snmp取走。
+</span>WORKPATH<span class="token operator">=</span><span class="token operator">/</span>home<span class="token operator">/</span>zfxing<span class="token operator">/</span>bd
+
+<span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token operator">-</span>f <span class="token property">${WORKPATH}</span><span class="token operator">/</span>output<span class="token property">$2</span><span class="token punctuation">.</span>pid <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token punctuation">[</span> <span class="token operator">-</span>f <span class="token property">${WORKPATH}</span><span class="token operator">/</span>input<span class="token property">$2</span><span class="token punctuation">.</span>pid <span class="token punctuation">]</span>
+<span class="token keyword">then</span>
+        ps <span class="token operator">-</span>ef<span class="token operator">|</span>grep `cat <span class="token property">${WORKPATH}</span><span class="token operator">/</span>output<span class="token property">$2</span><span class="token punctuation">.</span>pid`<span class="token operator">|</span>grep ptal
+        <span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token property">$?</span> <span class="token operator">-</span>eq <span class="token number">0</span> <span class="token punctuation">]</span><span class="token punctuation">]</span>
+        <span class="token keyword">then</span>
+                kill <span class="token operator">-</span><span class="token number">9</span> `cat <span class="token property">${WORKPATH}</span><span class="token operator">/</span>output<span class="token property">$2</span><span class="token punctuation">.</span>pid`
+        <span class="token keyword">fi</span>
+
+        ps <span class="token operator">-</span>ef<span class="token operator">|</span>grep `cat <span class="token property">${WORKPATH}</span><span class="token operator">/</span>input<span class="token property">$2</span><span class="token punctuation">.</span>pid`<span class="token operator">|</span>grep ptal
+        <span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token property">$?</span> <span class="token operator">-</span>eq <span class="token number">0</span> <span class="token punctuation">]</span><span class="token punctuation">]</span>
+        <span class="token keyword">then</span>
+                kill <span class="token operator">-</span><span class="token number">9</span> `cat <span class="token property">${WORKPATH}</span><span class="token operator">/</span>input<span class="token property">$2</span><span class="token punctuation">.</span>pid`
+        <span class="token keyword">fi</span>
+<span class="token keyword">fi</span>
+
+<span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token operator">-</span>f <span class="token property">${WORKPATH}</span><span class="token operator">/</span>output<span class="token property">$2</span> <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token punctuation">[</span> <span class="token operator">-</span>f <span class="token property">${WORKPATH}</span><span class="token operator">/</span>input<span class="token property">$2</span> <span class="token punctuation">]</span>
+<span class="token keyword">then</span>
+    mv <span class="token property">${WORKPATH}</span><span class="token operator">/</span>output<span class="token property">$2</span> <span class="token property">${WORKPATH}</span><span class="token operator">/</span>output_deal<span class="token property">$2</span>
+    mv <span class="token property">${WORKPATH}</span><span class="token operator">/</span>input<span class="token property">$2</span> <span class="token property">${WORKPATH}</span><span class="token operator">/</span>input_deal<span class="token property">$2</span>
+<span class="token keyword">else</span> 
+    <span class="token property">${WORKPATH}</span><span class="token operator">/</span>ptal <span class="token property">$1</span> <span class="token string">"src host <span class="token property">$3</span> and src port <span class="token property">$2</span>"</span> <span class="token operator">&gt;</span> <span class="token property">${WORKPATH}</span><span class="token operator">/</span>output<span class="token property">$2</span> <span class="token operator">&amp;</span>
+    <span class="token keyword">echo</span> <span class="token property">$!</span> <span class="token operator">&gt;</span> <span class="token property">${WORKPATH}</span><span class="token operator">/</span>output<span class="token property">$2</span><span class="token punctuation">.</span>pid
+    <span class="token property">${WORKPATH}</span><span class="token operator">/</span>ptal <span class="token property">$1</span> <span class="token string">"dst host <span class="token property">$3</span> and dst port <span class="token property">$2</span>"</span> <span class="token operator">&gt;</span> <span class="token property">${WORKPATH}</span><span class="token operator">/</span>input<span class="token property">$2</span> <span class="token operator">&amp;</span>
+    <span class="token keyword">echo</span> <span class="token property">$!</span> <span class="token operator">&gt;</span> <span class="token property">${WORKPATH}</span><span class="token operator">/</span>input<span class="token property">$2</span><span class="token punctuation">.</span>pid
+    <span class="token keyword">exit</span>
+<span class="token keyword">fi</span>
+
+<span class="token property">${WORKPATH}</span><span class="token operator">/</span>ptal <span class="token property">$1</span> <span class="token string">"src host <span class="token property">$3</span> and src port <span class="token property">$2</span>"</span> <span class="token operator">&gt;</span> <span class="token property">${WORKPATH}</span><span class="token operator">/</span>output<span class="token property">$2</span> <span class="token operator">&amp;</span>
+<span class="token keyword">echo</span> <span class="token property">$!</span> <span class="token operator">&gt;</span> <span class="token property">${WORKPATH}</span><span class="token operator">/</span>output<span class="token property">$2</span><span class="token punctuation">.</span>pid
+<span class="token property">${WORKPATH}</span><span class="token operator">/</span>ptal <span class="token property">$1</span> <span class="token string">"dst host <span class="token property">$3</span> and dst port <span class="token property">$2</span>"</span> <span class="token operator">&gt;</span> <span class="token property">${WORKPATH}</span><span class="token operator">/</span>input<span class="token property">$2</span> <span class="token operator">&amp;</span>
+<span class="token keyword">echo</span> <span class="token property">$!</span> <span class="token operator">&gt;</span> <span class="token property">${WORKPATH}</span><span class="token operator">/</span>input<span class="token property">$2</span><span class="token punctuation">.</span>pid
+
+<span class="token comment" spellcheck="true">#output
+</span><span class="token comment" spellcheck="true">#判断，若行数小于4，则直接给出结果0；若时间间隔为0，则直接给出结果0
+</span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> `cat <span class="token property">${WORKPATH}</span><span class="token operator">/</span>output_deal<span class="token property">$2</span> <span class="token operator">|</span>wc <span class="token operator">-</span>l` <span class="token operator">-</span>lt <span class="token number">4</span> <span class="token punctuation">]</span><span class="token punctuation">]</span>
+<span class="token keyword">then</span>
+    obandwidth<span class="token operator">=</span><span class="token number">0</span>
+<span class="token keyword">else</span>
+    sed <span class="token operator">-</span>i <span class="token string">'1d;<span class="token property">$d</span>'</span> <span class="token property">${WORKPATH}</span><span class="token operator">/</span>output_deal<span class="token property">$2</span> <span class="token comment" spellcheck="true">#去掉第一行和最后一行
+</span>
+    otraffic<span class="token operator">=</span>`cat <span class="token property">${WORKPATH}</span><span class="token operator">/</span>output_deal<span class="token property">$2</span> <span class="token operator">|</span>awk <span class="token string">'{print <span class="token property">$2</span>}'</span><span class="token operator">|</span>tr <span class="token string">"\n"</span> <span class="token string">"+"</span>`
+
+    otraffic<span class="token operator">=</span>`<span class="token keyword">echo</span> <span class="token property">${otraffic}</span><span class="token number">0</span><span class="token operator">|</span>bc`
+
+    ostime<span class="token operator">=</span>`cat <span class="token property">${WORKPATH}</span><span class="token operator">/</span>output_deal<span class="token property">$2</span> <span class="token operator">|</span> head <span class="token operator">-</span><span class="token number">1</span><span class="token operator">|</span>awk <span class="token string">'{print <span class="token property">$1</span>}'</span>`
+    oetime<span class="token operator">=</span>`cat <span class="token property">${WORKPATH}</span><span class="token operator">/</span>output_deal<span class="token property">$2</span> <span class="token operator">|</span> tail <span class="token operator">-</span><span class="token number">1</span><span class="token operator">|</span>awk <span class="token string">'{print <span class="token property">$1</span>}'</span>`
+    ointerval<span class="token operator">=</span>`expr <span class="token property">$oetime</span> <span class="token operator">-</span> <span class="token property">$ostime</span>`
+
+    <span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token property">$ointerval</span> <span class="token operator">-</span>eq <span class="token number">0</span> <span class="token punctuation">]</span><span class="token punctuation">]</span>
+    <span class="token keyword">then</span>
+        obandwidth<span class="token operator">=</span><span class="token number">0</span>
+    <span class="token keyword">else</span>
+        obandwidth<span class="token operator">=</span>`expr <span class="token property">$otraffic</span> <span class="token operator">/</span> <span class="token property">$ointerval</span>`
+    <span class="token keyword">fi</span>
+<span class="token keyword">fi</span>
+
+<span class="token comment" spellcheck="true">#input
+</span><span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> `cat <span class="token property">${WORKPATH}</span><span class="token operator">/</span>input_deal<span class="token property">$2</span> <span class="token operator">|</span>wc <span class="token operator">-</span>l` <span class="token operator">-</span>lt <span class="token number">4</span> <span class="token punctuation">]</span><span class="token punctuation">]</span>
+<span class="token keyword">then</span>
+    ibandwidth<span class="token operator">=</span><span class="token number">0</span>
+<span class="token keyword">else</span>
+    sed <span class="token operator">-</span>i <span class="token string">'1d;<span class="token property">$d</span>'</span> <span class="token property">${WORKPATH}</span><span class="token operator">/</span>input_deal<span class="token property">$2</span>
+
+    itraffic<span class="token operator">=</span>`cat <span class="token property">${WORKPATH}</span><span class="token operator">/</span>input_deal<span class="token property">$2</span> <span class="token operator">|</span>awk <span class="token string">'{print <span class="token property">$2</span>}'</span><span class="token operator">|</span>tr <span class="token string">"\n"</span> <span class="token string">"+"</span>`
+
+    itraffic<span class="token operator">=</span>`<span class="token keyword">echo</span> <span class="token property">${itraffic}</span><span class="token number">0</span><span class="token operator">|</span>bc`
+
+    istime<span class="token operator">=</span>`cat <span class="token property">${WORKPATH}</span><span class="token operator">/</span>input_deal<span class="token property">$2</span> <span class="token operator">|</span> head <span class="token operator">-</span><span class="token number">1</span><span class="token operator">|</span>awk <span class="token string">'{print <span class="token property">$1</span>}'</span>`
+    ietime<span class="token operator">=</span>`cat <span class="token property">${WORKPATH}</span><span class="token operator">/</span>input_deal<span class="token property">$2</span> <span class="token operator">|</span> tail <span class="token operator">-</span><span class="token number">1</span><span class="token operator">|</span>awk <span class="token string">'{print <span class="token property">$1</span>}'</span>`
+    iinterval<span class="token operator">=</span>`expr <span class="token property">$ietime</span> <span class="token operator">-</span> <span class="token property">$istime</span>`
+
+    <span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token property">$iinterval</span> <span class="token operator">-</span>eq <span class="token number">0</span> <span class="token punctuation">]</span><span class="token punctuation">]</span>
+    <span class="token keyword">then</span>
+        ibandwidth<span class="token operator">=</span><span class="token number">0</span>
+    <span class="token keyword">else</span>
+        ibandwidth<span class="token operator">=</span>`expr <span class="token property">$itraffic</span> <span class="token operator">/</span> <span class="token property">$iinterval</span>`
+    <span class="token keyword">fi</span>
+<span class="token keyword">fi</span>
+
+<span class="token keyword">echo</span> <span class="token string">"time|output_bd|input_bd:    "</span>`date <span class="token string">"+%x %T"</span>`<span class="token string">"|"</span><span class="token property">$obandwidth</span><span class="token string">"|"</span><span class="token property">$ibandwidth</span> <span class="token operator">&gt;</span><span class="token operator">&gt;</span> <span class="token property">${WORKPATH}</span><span class="token operator">/</span>res<span class="token property">$2</span><span class="token punctuation">.</span>log
 </code></pre>
 <!-- content end -->
 </div>
@@ -722,6 +356,10 @@ echo "time|output_bd|input_bd:    "`date "+%x %T"`"|"$obandwidth"|"$ibandwidth &
 	</div>
 </div>
 <script src="main.js"></script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
 <script id="content" type="text/mustache">
     <h1>{{title}}</h1>
     <div class="tag">
@@ -776,10 +414,6 @@ $(document).ready(function() {
         }
     });
 });
-</script>
-<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
 </script>
 </body>
 </html>
