@@ -28,12 +28,35 @@
 本地目录：`/home/levinpluto/OldLinux`
 ```
 resources: 从网络或者其他途径获取的各种包
+linux-0.11-devel-050518: 和书中实例匹配的开发包(已解压)
 ...
 ```
 ###1. 获取bochs
 我获取的版本为： [bochs-2.2.1-1.i586.rpm](http://www.oldlinux.org/Linux.old/bochs/Bochs/bochs-2.2.1/bochs-2.2.1-1.i586.rpm). 安装略。
 
-###2. 
+###2. 获取开发包
+[linux-0.11-devel-050518.zip](http://oldlinux.org/Linux.old/bochs/linux-0.11-devel-050518.zip)
+
+###3. 运行bochsrc-fda.bxrc配置的系统
+修改bochsrc-fda.bxrc，将其中路径反斜杠换成斜杠。
+~~~~{bash}
+bochs -f bochsrc-fda.bxrc
+~~~~
+输入[5] -> 在打开的窗口中点击右上方的`CONFIG` -> 切回命令行输入[1] -> 键入rootimage-0.11换盘，回车、回车 -> 输入[12]继续 -> 在打开的窗口中点击回车，进入系统
+
+###4. 运行bochsrc-fdb.bxrc配置的系统
+修改bochsrc-fdb.bxrc，将其中路径反斜杠换成斜杠。
+~~~~{bash}
+bochs -f bochsrc-fdb.bxrc
+~~~~
+相比fba，fdb中同时插入了两块盘，一块为bootimage,一块为rootimage,且bootimage中已经将根文件系统设备号设置为B盘，所以输入[5]直接运行即可。
+
+###5. bochsrc-hd.bxrc
+(略，同上，使用hdc第一个分区的根文件系统）
+
+###6. bochsrc-hdboot.bxrc
+亦可直接进入系统，使用的类grub引导程序(Minix中的shoelace)
+
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
@@ -41,6 +64,7 @@ resources: 从网络或者其他途径获取的各种包
 <p>本地目录：<code>/home/levinpluto/OldLinux</code></p>
 
 <pre><code>resources: 从网络或者其他途径获取的各种包
+linux-0.11-devel-050518: 和书中实例匹配的开发包(已解压)
 ...
 </code></pre>
 
@@ -48,7 +72,29 @@ resources: 从网络或者其他途径获取的各种包
 
 <p>我获取的版本为： <a href="http://www.oldlinux.org/Linux.old/bochs/Bochs/bochs-2.2.1/bochs-2.2.1-1.i586.rpm">bochs-2.2.1-1.i586.rpm</a>. 安装略。</p>
 
-<h3 id="2">2.</h3>
+<h3 id="2">2. 获取开发包</h3>
+
+<p><a href="http://oldlinux.org/Linux.old/bochs/linux-0.11-devel-050518.zip">linux-0.11-devel-050518.zip</a></p>
+
+<h3 id="3bochsrcfdabxrc">3. 运行bochsrc-fda.bxrc配置的系统</h3>
+
+<p>修改bochsrc-fda.bxrc，将其中路径反斜杠换成斜杠。
+</p><pre class=" language-bash"><code class=" language-bash">bochs <span class="token operator">-</span>f bochsrc<span class="token operator">-</span>fda<span class="token punctuation">.</span>bxrc
+</code></pre>输入[5] -&gt; 在打开的窗口中点击右上方的<code>CONFIG</code> -&gt; 切回命令行输入[1] -&gt; 键入rootimage-0.11换盘，回车、回车 -&gt; 输入[12]继续 -&gt; 在打开的窗口中点击回车，进入系统<p></p>
+
+<h3 id="4bochsrcfdbbxrc">4. 运行bochsrc-fdb.bxrc配置的系统</h3>
+
+<p>修改bochsrc-fdb.bxrc，将其中路径反斜杠换成斜杠。
+</p><pre class=" language-bash"><code class=" language-bash">bochs <span class="token operator">-</span>f bochsrc<span class="token operator">-</span>fdb<span class="token punctuation">.</span>bxrc
+</code></pre>相比fba，fdb中同时插入了两块盘，一块为bootimage,一块为rootimage,且bootimage中已经将根文件系统设备号设置为B盘，所以输入[5]直接运行即可。<p></p>
+
+<h3 id="5bochsrchdbxrc">5. bochsrc-hd.bxrc</h3>
+
+<p>(略，同上，使用hdc第一个分区的根文件系统）</p>
+
+<h3 id="6bochsrchdbootbxrc">6. bochsrc-hdboot.bxrc</h3>
+
+<p>亦可直接进入系统，使用的类grub引导程序(Minix中的shoelace)</p>
 <!-- content end -->
 </div>
 <br>
