@@ -57,7 +57,7 @@ typedef void (*__sighandler_t) (int);
 #define SIG_IGN ((__sighandler_t) 1)        /* Ignore signal.  */
 ~~~~
 
-
+signal函数有趣的一点是：*如果不尝试改变信号处理方式则不能得到目前的信号处理方式*
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
@@ -95,6 +95,8 @@ sighandler_t <span class="token function">signal<span class="token punctuation">
 <span class="token property">#define SIG_DFL ((__sighandler_t) 0)        </span><span class="token comment" spellcheck="true">/* Default action.  */</span>
 <span class="token property">#define SIG_IGN ((__sighandler_t) 1)        </span><span class="token comment" spellcheck="true">/* Ignore signal.  */</span>
 </code></pre>
+
+<p>signal函数有趣的一点是：<em>如果不尝试改变信号处理方式则不能得到目前的信号处理方式</em></p>
 <!-- content end -->
 </div>
 <br>
