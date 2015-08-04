@@ -30,12 +30,25 @@
 ~~~~{bash}
 * * * * * echo `date +"%Y%m%d"` > /tmp/test
 ~~~~
+
 `wrong`
 
 ~~~~{bash}
 * * * * * echo `date +"\%Y\%m\%d"` > /tmp/test
 ~~~~
+
 `right`
+
+* 脚本传参给 awk：
+
+~~~~{bash}
+#!/bin/bash
+
+/usr/bin/tail -1 /etc/snmp/cache/cache.res | awk -F '|' '{print $"'$1'"}'
+~~~~
+
+*script* 1 --> 分割的第一段<br>
+*script* 2 --> 分割的第二段
 
 <!-- markdown end -->
 </div>
@@ -45,11 +58,27 @@
 <li>In crontab, % 意思为换行，所以若要使用%需要转义符：</li>
 </ul>
 
-<p></p><pre class=" language-bash"><code class=" language-bash"><span class="token operator">*</span> <span class="token operator">*</span> <span class="token operator">*</span> <span class="token operator">*</span> <span class="token operator">*</span> <span class="token keyword">echo</span> date <span class="token operator">+</span><span class="token string">"%Y%m%d"</span> <span class="token operator">&gt;</span> <span class="token operator">/</span>tmp<span class="token operator">/</span>test
-</code></pre><code>wrong</code><p></p>
+<pre class=" language-bash"><code class=" language-bash"><span class="token operator">*</span> <span class="token operator">*</span> <span class="token operator">*</span> <span class="token operator">*</span> <span class="token operator">*</span> <span class="token keyword">echo</span> `date <span class="token operator">+</span><span class="token string">"%Y%m%d"</span>` <span class="token operator">&gt;</span> <span class="token operator">/</span>tmp<span class="token operator">/</span>test
+</code></pre>
 
-<p></p><pre class=" language-bash"><code class=" language-bash"><span class="token operator">*</span> <span class="token operator">*</span> <span class="token operator">*</span> <span class="token operator">*</span> <span class="token operator">*</span> <span class="token keyword">echo</span> date <span class="token operator">+</span><span class="token string">"\%Y\%m\%d"</span> <span class="token operator">&gt;</span> <span class="token operator">/</span>tmp<span class="token operator">/</span>test
-</code></pre><code>right</code><p></p>
+<p><code>wrong</code></p>
+
+<pre class=" language-bash"><code class=" language-bash"><span class="token operator">*</span> <span class="token operator">*</span> <span class="token operator">*</span> <span class="token operator">*</span> <span class="token operator">*</span> <span class="token keyword">echo</span> `date <span class="token operator">+</span><span class="token string">"\%Y\%m\%d"</span>` <span class="token operator">&gt;</span> <span class="token operator">/</span>tmp<span class="token operator">/</span>test
+</code></pre>
+
+<p><code>right</code></p>
+
+<ul>
+<li>脚本传参给 awk：</li>
+</ul>
+
+<pre class=" language-bash"><code class=" language-bash"><span class="token important">#!/bin/bash</span>
+
+<span class="token operator">/</span>usr<span class="token operator">/</span>bin<span class="token operator">/</span>tail <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">/</span>etc<span class="token operator">/</span>snmp<span class="token operator">/</span>cache<span class="token operator">/</span>cache<span class="token punctuation">.</span>res <span class="token operator">|</span> awk <span class="token operator">-</span>F <span class="token string">'|'</span> <span class="token string">'{print $"'</span><span class="token property">$1</span><span class="token string">'"}'</span>
+</code></pre>
+
+<p><em>script</em> 1 --&gt; 分割的第一段<br>
+<em>script</em> 2 --&gt; 分割的第二段</p>
 <!-- content end -->
 </div>
 <br>
