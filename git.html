@@ -1,0 +1,226 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+###Git 版本管理
+环境：
+```
+[zfx@localhost vproject]$ pwd
+/home/zfx/Work/git_test/vproject
+[zfx@localhost vproject]$ ls -al
+total 20
+drwxrwxr-x 2 zfx zfx 4096 Aug  5 15:42 .
+drwxrwxr-x 3 zfx zfx 4096 Aug  5 15:13 ..
+-rw-rw-r-- 1 zfx zfx    2 Aug  5 15:42 unchanged
+-rw-rw-r-- 1 zfx zfx    4 Aug  5 15:42 version-changed
+-rw-rw-r-- 1 zfx zfx    2 Aug  5 15:42 willremoved
+```
+
+初始化: `git init`
+
+添加文件: `git add *`
+
+提交第一个版本: `git commit -m -a "v1.0"`
+
+版本二：
+```
+[zfx@localhost vproject]$ rm willremoved 
+[zfx@localhost vproject]$ echo "3" > newadded
+[zfx@localhost vproject]$ echo "2.0" > version-changed 
+[zfx@localhost vproject]$ ls -al
+total 24
+drwxrwxr-x 3 zfx zfx 4096 Aug  5 15:50 .
+drwxrwxr-x 3 zfx zfx 4096 Aug  5 15:13 ..
+drwxrwxr-x 8 zfx zfx 4096 Aug  5 15:48 .git
+-rw-rw-r-- 1 zfx zfx    2 Aug  5 15:50 newadded
+-rw-rw-r-- 1 zfx zfx    2 Aug  5 15:42 unchanged
+-rw-rw-r-- 1 zfx zfx    4 Aug  5 15:50 version-changed
+```
+
+`git add *`
+
+`git rm willremoved`
+
+`git commit -m "v2.0"`
+
+`git log`:
+```
+commit e6c9bbfe00596e09e19436deeabd038be89fe120
+Author: zfx <zfx@localhost.localdomain>
+Date:   Wed Aug 5 15:51:47 2015 +0800
+
+    v2.0
+
+commit 6f79f56729803b8057d3d89e77373176b71811a3
+Author: zfx <zfx@localhost.localdomain>
+Date:   Wed Aug 5 15:47:46 2015 +0800
+
+    v1.0
+```
+
+a. 现在想回退回v1.0
+
+b. 之前提交的version-changed文件修改有问题，想重新修改提交
+
+c. 远程获取完整的拷贝
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<h3 id="git">Git 版本管理</h3>
+
+<p>环境：</p>
+
+<pre><code>[zfx@localhost vproject]$ pwd
+/home/zfx/Work/git_test/vproject
+[zfx@localhost vproject]$ ls -al
+total 20
+drwxrwxr-x 2 zfx zfx 4096 Aug  5 15:42 .
+drwxrwxr-x 3 zfx zfx 4096 Aug  5 15:13 ..
+-rw-rw-r-- 1 zfx zfx    2 Aug  5 15:42 unchanged
+-rw-rw-r-- 1 zfx zfx    4 Aug  5 15:42 version-changed
+-rw-rw-r-- 1 zfx zfx    2 Aug  5 15:42 willremoved
+</code></pre>
+
+<p>初始化: <code>git init</code></p>
+
+<p>添加文件: <code>git add *</code></p>
+
+<p>提交第一个版本: <code>git commit -m -a "v1.0"</code></p>
+
+<p>版本二：</p>
+
+<pre><code>[zfx@localhost vproject]$ rm willremoved 
+[zfx@localhost vproject]$ echo "3" &gt; newadded
+[zfx@localhost vproject]$ echo "2.0" &gt; version-changed 
+[zfx@localhost vproject]$ ls -al
+total 24
+drwxrwxr-x 3 zfx zfx 4096 Aug  5 15:50 .
+drwxrwxr-x 3 zfx zfx 4096 Aug  5 15:13 ..
+drwxrwxr-x 8 zfx zfx 4096 Aug  5 15:48 .git
+-rw-rw-r-- 1 zfx zfx    2 Aug  5 15:50 newadded
+-rw-rw-r-- 1 zfx zfx    2 Aug  5 15:42 unchanged
+-rw-rw-r-- 1 zfx zfx    4 Aug  5 15:50 version-changed
+</code></pre>
+
+<p><code>git add *</code></p>
+
+<p><code>git rm willremoved</code></p>
+
+<p><code>git commit -m "v2.0"</code></p>
+
+<p><code>git log</code>:</p>
+
+<pre><code>commit e6c9bbfe00596e09e19436deeabd038be89fe120
+Author: zfx &lt;zfx@localhost.localdomain&gt;
+Date:   Wed Aug 5 15:51:47 2015 +0800
+
+    v2.0
+
+commit 6f79f56729803b8057d3d89e77373176b71811a3
+Author: zfx &lt;zfx@localhost.localdomain&gt;
+Date:   Wed Aug 5 15:47:46 2015 +0800
+
+    v1.0
+</code></pre>
+
+<p>a. 现在想回退回v1.0</p>
+
+<p>b. 之前提交的version-changed文件修改有问题，想重新修改提交</p>
+
+<p>c. 远程获取完整的拷贝</p>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "git.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+</body>
+</html>
