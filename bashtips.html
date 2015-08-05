@@ -50,6 +50,27 @@
 *script* 1 --> 分割的第一段<br>
 *script* 2 --> 分割的第二段
 
+* 检查进程打开的最大文件数的脚本
+
+~~~~{bash}
+#!/bin/bash
+
+maxopen=`ulimit -n`
+cd /proc/ && find . -maxdepth 1 -name [1-9]\*| while read pid
+do
+        pidopen=`ls ${pid}/fd |wc -l`
+        rate=`expr $pidopen \* 100 / $maxopen`
+        if [[ ${rate} -gt 80 ]]
+        then
+                echo "Warning: the process pid $pid open too many files."
+        fi
+done
+~~~~
+
+**注意**：有一处不严谨，`ulimit -n`得到的是执行该脚本的用户的进程数量限制，但proc目录里可不全是该用户的进程(暂不考虑)。
+
+**TIPS**：`find` 的 `maxdepth` 参数能指定目录层数，脚本里只搜索当前目录(不包含子目录)；`expr` 使用`乘号`时需要反义符。
+
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
@@ -79,6 +100,28 @@
 
 <p><em>script</em> 1 --&gt; 分割的第一段<br>
 <em>script</em> 2 --&gt; 分割的第二段</p>
+
+<ul>
+<li>检查进程打开的最大文件数的脚本</li>
+</ul>
+
+<pre class=" language-bash"><code class=" language-bash"><span class="token important">#!/bin/bash</span>
+
+maxopen<span class="token operator">=</span>`ulimit <span class="token operator">-</span>n`
+cd <span class="token operator">/</span>proc<span class="token operator">/</span> <span class="token operator">&amp;&amp;</span> find <span class="token punctuation">.</span> <span class="token operator">-</span>maxdepth <span class="token number">1</span> <span class="token operator">-</span>name <span class="token punctuation">[</span><span class="token number">1</span><span class="token operator">-</span><span class="token number">9</span><span class="token punctuation">]</span>\<span class="token operator">*</span><span class="token operator">|</span> <span class="token keyword">while</span> read pid
+<span class="token keyword">do</span>
+        pidopen<span class="token operator">=</span>`ls <span class="token property">${pid}</span><span class="token operator">/</span>fd <span class="token operator">|</span>wc <span class="token operator">-</span>l`
+        rate<span class="token operator">=</span>`expr <span class="token property">$pidopen</span> \<span class="token operator">*</span> <span class="token number">100</span> <span class="token operator">/</span> <span class="token property">$maxopen</span>`
+        <span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token property">${rate}</span> <span class="token operator">-</span>gt <span class="token number">80</span> <span class="token punctuation">]</span><span class="token punctuation">]</span>
+        <span class="token keyword">then</span>
+                <span class="token keyword">echo</span> <span class="token string">"Warning: the process pid <span class="token property">$pid</span> open too many files."</span>
+        <span class="token keyword">fi</span>
+<span class="token keyword">done</span>
+</code></pre>
+
+<p><strong>注意</strong>：有一处不严谨，<code>ulimit -n</code>得到的是执行该脚本的用户的进程数量限制，但proc目录里可不全是该用户的进程(暂不考虑)。</p>
+
+<p><strong>TIPS</strong>：<code>find</code> 的 <code>maxdepth</code> 参数能指定目录层数，脚本里只搜索当前目录(不包含子目录)；<code>expr</code> 使用<code>乘号</code>时需要反义符。</p>
 <!-- content end -->
 </div>
 <br>
