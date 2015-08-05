@@ -27,7 +27,7 @@
 <!-- markdown -->
 * 允许打开的最大文件数量: `ulimit -n`
 
-**注意**：该数量对应的是一个进程允许打开的最大文件数量。该数量与`ls /proc/<pid> | wc -l`得到的数量一致。与`lsof -p <pid> | wc -l`得到的数量不一致。（lsof得到的数量远大于前者，为什么？）
+**注意**：该数量对应的是一个进程允许打开的最大文件数量。该数量与`ls /proc/<pid>/fd | wc -l`得到的数量一致。与`lsof -p <pid> | wc -l`得到的数量不一致。（lsof得到的数量远大于前者，为什么？）
 
 *
 <!-- markdown end -->
@@ -38,7 +38,7 @@
 <li>允许打开的最大文件数量: <code>ulimit -n</code></li>
 </ul>
 
-<p><strong>注意</strong>：该数量对应的是一个进程允许打开的最大文件数量。该数量与<code>ls /proc/&lt;pid&gt; | wc -l</code>得到的数量一致。与<code>lsof -p &lt;pid&gt; | wc -l</code>得到的数量不一致。（lsof得到的数量远大于前者，为什么？）</p>
+<p><strong>注意</strong>：该数量对应的是一个进程允许打开的最大文件数量。该数量与<code>ls /proc/&lt;pid&gt;/fd | wc -l</code>得到的数量一致。与<code>lsof -p &lt;pid&gt; | wc -l</code>得到的数量不一致。（lsof得到的数量远大于前者，为什么？）</p>
 
 <p>*</p>
 <!-- content end -->
