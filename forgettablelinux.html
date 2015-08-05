@@ -29,6 +29,14 @@
 
 **注意**：该数量对应的是一个进程允许打开的最大文件数量。该数量与`ls /proc/<pid>/fd | wc -l`得到的数量一致。与`lsof -p <pid> | wc -l`得到的数量不一致。（lsof得到的数量远大于前者，为什么？）
 
+**修改该值**：
+~~~~{bash}
+ulimit -SHn 4096
+
+echo "*    soft    nofile    4096" >> /etc/security/limits.conf
+echo "*    hard    nofile    4096" >> /etc/security/limits.conf
+~~~~
+
 *
 <!-- markdown end -->
 </div>
@@ -39,6 +47,14 @@
 </ul>
 
 <p><strong>注意</strong>：该数量对应的是一个进程允许打开的最大文件数量。该数量与<code>ls /proc/&lt;pid&gt;/fd | wc -l</code>得到的数量一致。与<code>lsof -p &lt;pid&gt; | wc -l</code>得到的数量不一致。（lsof得到的数量远大于前者，为什么？）</p>
+
+<p><strong>修改该值</strong>：</p>
+
+<pre class=" language-bash"><code class=" language-bash">ulimit <span class="token operator">-</span>SHn <span class="token number">4096</span>
+
+<span class="token keyword">echo</span> <span class="token string">"*    soft    nofile    4096"</span> <span class="token operator">&gt;</span><span class="token operator">&gt;</span> <span class="token operator">/</span>etc<span class="token operator">/</span>security<span class="token operator">/</span>limits<span class="token punctuation">.</span>conf
+<span class="token keyword">echo</span> <span class="token string">"*    hard    nofile    4096"</span> <span class="token operator">&gt;</span><span class="token operator">&gt;</span> <span class="token operator">/</span>etc<span class="token operator">/</span>security<span class="token operator">/</span>limits<span class="token punctuation">.</span>conf
+</code></pre>
 
 <p>*</p>
 <!-- content end -->
