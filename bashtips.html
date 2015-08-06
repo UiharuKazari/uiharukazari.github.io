@@ -71,6 +71,18 @@ done
 
 **TIPS**：`find` 的 `maxdepth` 参数能指定目录层数，脚本里只搜索当前目录(不包含子目录)；`expr` 使用`乘号`时需要反义符。
 
+* date 昨天
+~~~~{bash}
+date -d "-1 day" +%F
+~~~~
+
+* bc 小数点
+~~~~{bash}
+echo "scale=2;1.23+4.56"|bc
+~~~~
+
+
+
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
@@ -122,6 +134,20 @@ cd <span class="token operator">/</span>proc<span class="token operator">/</span
 <p><strong>注意</strong>：有一处不严谨，<code>ulimit -n</code>得到的是执行该脚本的用户的进程数量限制，但proc目录里可不全是该用户的进程(暂不考虑)。</p>
 
 <p><strong>TIPS</strong>：<code>find</code> 的 <code>maxdepth</code> 参数能指定目录层数，脚本里只搜索当前目录(不包含子目录)；<code>expr</code> 使用<code>乘号</code>时需要反义符。</p>
+
+<ul>
+<li>date 昨天</li>
+</ul>
+
+<pre class=" language-bash"><code class=" language-bash">date <span class="token operator">-</span>d <span class="token string">"-1 day"</span> <span class="token operator">+</span><span class="token operator">%</span>F
+</code></pre>
+
+<ul>
+<li>bc 小数点</li>
+</ul>
+
+<pre class=" language-bash"><code class=" language-bash"><span class="token keyword">echo</span> <span class="token string">"scale=2;1.23+4.56"</span><span class="token operator">|</span>bc
+</code></pre>
 <!-- content end -->
 </div>
 <br>
