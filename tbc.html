@@ -1,0 +1,237 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+			<h1>
+            <a href="/" id="title"></a>
+			</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+* 写了个脚本处理日志，如下：
+~~~~{bash}
+#!/bin/bash
+
+#/opt/tomcat_host/logs/charge.log.`date -d "-1 day" +%F`
+#cat charge.log.2015-08-05 |grep "EntranceInterfaceServiceImpl(66)| INFO|交易结束"|grep "<TTYPE>0800</TTYPE>"|awk -F '>|<' '{print $11" "$15" "$31}' > res1
+#cat res1 |sort > res1.sort
+#cat res1.sort |grep  "交易成功" > res1.sort.success
+#grep -v 交易成功
+#bash deal.sh > res1.sort.success.deal
+
+logfile=/opt/tomcat_host/logs/charge.log.`date -d "-1 day" +%F`
+cardnopre=nobody
+
+cat $logfile |grep "EntranceInterfaceServiceImpl(66)| INFO|交易结束"|grep "<TTYPE>0800</TTYPE>"|awk -F '>|<' '{print $11" "$15" "$31}' | sort | grep  -v "交易成功"
+
+echo 
+
+cat $logfile |grep "EntranceInterfaceServiceImpl(66)| INFO|交易结束"|grep "<TTYPE>0800</TTYPE>"|awk -F '>|<' '{print $11" "$15" "$31}' | sort | grep  "交易成功" | while read line
+do
+    cardno=`echo $line | awk '{print $1}'`
+    if [ $cardno != $cardnopre ]
+    then
+        echo $cardnopre" "$allmoney" "$count
+        allmoney=0
+        count=0
+        thismoney=`echo $line | awk '{print $2}'`
+        allmoney=`echo "scale=2;${allmoney}+${thismoney}"|bc`
+        count=`expr $count + 1`
+        cardnopre=`echo $line | awk '{print $1}'`
+    else
+        thismoney=`echo $line | awk '{print $2}'`
+        allmoney=`echo "scale=2;${allmoney}+${thismoney}"|bc`
+        count=`expr $count + 1`
+    fi
+done
+~~~~
+
+运行过程中vmstat对比：
+```
+procs -----------memory---------- ---swap-- -----io---- --system-- -----cpu------
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+ 2  0      8  70120 521984 6019448    0    0     0  2176 1110 2120  7 28 53 12  0
+ 3  0      8  69880 521984 6019460    0    0     0   112 1049 2024  7 28 64  1  0
+ 1  0      8  70128 521984 6019460    0    0     0    64 1040 2024  7 28 65  1  0
+ 1  0      8  70012 521984 6019476    0    0     0    84 1042 2018  7 27 65  1  0
+ 3  0      8  70376 521984 6019476    0    0     0   152 1049 1951  7 28 64  1  0
+ 1  0      8  70136 521984 6019496    0    0     0    72 1044 1988  7 28 65  1  0
+ 1  0      8  70260 521984 6019496    0    0     0    88 1041 2022  7 28 64  1  0
+ 2  0      8  70020 521984 6019508    0    0     0    52 1034 2035  7 28 64  1  0
+ 1  0      8  70276 521984 6019512    0    0     0    76 1037 2034  7 27 65  1  0
+ 0  0      8  70944 521984 6019524    0    0     0   172 1040 1548  6 18 74  1  0
+(STOP HERE)
+ 0  0      8  70944 521984 6019524    0    0     0  1360 1078  795  5  1 90  4  0
+ 0  0      8  70944 521984 6019544    0    0     0    84 1036  678  6  1 93  1  0
+ 1  0      8  70944 521984 6019544    0    0     0    64 1026  698  9  1 89  1  0
+ 0  0      8  70944 521984 6019552    0    0     0   140 1042  702 10  0 88  2  0
+ 0  0      8  70944 521984 6019568    0    0     0     0 1006  574  0  0 100  0  0
+ 0  0      8  71108 521984 6019572    0    0     0     0 1004  573  0  0 100  0  0
+ 0  0      8  71116 521984 6019572    0    0     0   100 1027  584  0  1 97  2  0
+```
+
+**问：为什么cs(上下文)和系统cpu占用有明显变化?**
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<ul>
+<li>写了个脚本处理日志，如下：</li>
+</ul>
+
+<pre class=" language-bash"><code class=" language-bash"><span class="token important">#!/bin/bash</span>
+
+<span class="token comment" spellcheck="true">#/opt/tomcat_host/logs/charge.log.`date -d "-1 day" +%F`
+</span><span class="token comment" spellcheck="true">#cat charge.log.2015-08-05 |grep "EntranceInterfaceServiceImpl(66)| INFO|交易结束"|grep "&lt;TTYPE&gt;0800&lt;/TTYPE&gt;"|awk -F '&gt;|&lt;' '{print $11" "$15" "$31}' &gt; res1
+</span><span class="token comment" spellcheck="true">#cat res1 |sort &gt; res1.sort
+</span><span class="token comment" spellcheck="true">#cat res1.sort |grep  "交易成功" &gt; res1.sort.success
+</span><span class="token comment" spellcheck="true">#grep -v 交易成功
+</span><span class="token comment" spellcheck="true">#bash deal.sh &gt; res1.sort.success.deal
+</span>
+logfile<span class="token operator">=</span><span class="token operator">/</span>opt<span class="token operator">/</span>tomcat_host<span class="token operator">/</span>logs<span class="token operator">/</span>charge<span class="token punctuation">.</span>log<span class="token punctuation">.</span>`date <span class="token operator">-</span>d <span class="token string">"-1 day"</span> <span class="token operator">+</span><span class="token operator">%</span>F`
+cardnopre<span class="token operator">=</span>nobody
+
+cat <span class="token property">$logfile</span> <span class="token operator">|</span>grep <span class="token string">"EntranceInterfaceServiceImpl(66)| INFO|交易结束"</span><span class="token operator">|</span>grep <span class="token string">"&lt;TTYPE&gt;0800&lt;/TTYPE&gt;"</span><span class="token operator">|</span>awk <span class="token operator">-</span>F <span class="token string">'&gt;|&lt;'</span> <span class="token string">'{print <span class="token property">$11</span>" "<span class="token property">$15</span>" "<span class="token property">$31</span>}'</span> <span class="token operator">|</span> sort <span class="token operator">|</span> grep  <span class="token operator">-</span>v <span class="token string">"交易成功"</span>
+
+<span class="token keyword">echo</span> 
+
+cat <span class="token property">$logfile</span> <span class="token operator">|</span>grep <span class="token string">"EntranceInterfaceServiceImpl(66)| INFO|交易结束"</span><span class="token operator">|</span>grep <span class="token string">"&lt;TTYPE&gt;0800&lt;/TTYPE&gt;"</span><span class="token operator">|</span>awk <span class="token operator">-</span>F <span class="token string">'&gt;|&lt;'</span> <span class="token string">'{print <span class="token property">$11</span>" "<span class="token property">$15</span>" "<span class="token property">$31</span>}'</span> <span class="token operator">|</span> sort <span class="token operator">|</span> grep  <span class="token string">"交易成功"</span> <span class="token operator">|</span> <span class="token keyword">while</span> read line
+<span class="token keyword">do</span>
+    cardno<span class="token operator">=</span>`<span class="token keyword">echo</span> <span class="token property">$line</span> <span class="token operator">|</span> awk <span class="token string">'{print <span class="token property">$1</span>}'</span>`
+    <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token property">$cardno</span> <span class="token operator">!</span><span class="token operator">=</span> <span class="token property">$cardnopre</span> <span class="token punctuation">]</span>
+    <span class="token keyword">then</span>
+        <span class="token keyword">echo</span> <span class="token property">$cardnopre</span><span class="token string">" "</span><span class="token property">$allmoney</span><span class="token string">" "</span><span class="token property">$count</span>
+        allmoney<span class="token operator">=</span><span class="token number">0</span>
+        count<span class="token operator">=</span><span class="token number">0</span>
+        thismoney<span class="token operator">=</span>`<span class="token keyword">echo</span> <span class="token property">$line</span> <span class="token operator">|</span> awk <span class="token string">'{print <span class="token property">$2</span>}'</span>`
+        allmoney<span class="token operator">=</span>`<span class="token keyword">echo</span> <span class="token string">"scale=2;<span class="token property">${allmoney}</span>+<span class="token property">${thismoney}</span>"</span><span class="token operator">|</span>bc`
+        count<span class="token operator">=</span>`expr <span class="token property">$count</span> <span class="token operator">+</span> <span class="token number">1</span>`
+        cardnopre<span class="token operator">=</span>`<span class="token keyword">echo</span> <span class="token property">$line</span> <span class="token operator">|</span> awk <span class="token string">'{print <span class="token property">$1</span>}'</span>`
+    <span class="token keyword">else</span>
+        thismoney<span class="token operator">=</span>`<span class="token keyword">echo</span> <span class="token property">$line</span> <span class="token operator">|</span> awk <span class="token string">'{print <span class="token property">$2</span>}'</span>`
+        allmoney<span class="token operator">=</span>`<span class="token keyword">echo</span> <span class="token string">"scale=2;<span class="token property">${allmoney}</span>+<span class="token property">${thismoney}</span>"</span><span class="token operator">|</span>bc`
+        count<span class="token operator">=</span>`expr <span class="token property">$count</span> <span class="token operator">+</span> <span class="token number">1</span>`
+    <span class="token keyword">fi</span>
+<span class="token keyword">done</span>
+</code></pre>
+
+<p>运行过程中vmstat对比：</p>
+
+<pre><code>procs -----------memory---------- ---swap-- -----io---- --system-- -----cpu------
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+ 2  0      8  70120 521984 6019448    0    0     0  2176 1110 2120  7 28 53 12  0
+ 3  0      8  69880 521984 6019460    0    0     0   112 1049 2024  7 28 64  1  0
+ 1  0      8  70128 521984 6019460    0    0     0    64 1040 2024  7 28 65  1  0
+ 1  0      8  70012 521984 6019476    0    0     0    84 1042 2018  7 27 65  1  0
+ 3  0      8  70376 521984 6019476    0    0     0   152 1049 1951  7 28 64  1  0
+ 1  0      8  70136 521984 6019496    0    0     0    72 1044 1988  7 28 65  1  0
+ 1  0      8  70260 521984 6019496    0    0     0    88 1041 2022  7 28 64  1  0
+ 2  0      8  70020 521984 6019508    0    0     0    52 1034 2035  7 28 64  1  0
+ 1  0      8  70276 521984 6019512    0    0     0    76 1037 2034  7 27 65  1  0
+ 0  0      8  70944 521984 6019524    0    0     0   172 1040 1548  6 18 74  1  0
+(STOP HERE)
+ 0  0      8  70944 521984 6019524    0    0     0  1360 1078  795  5  1 90  4  0
+ 0  0      8  70944 521984 6019544    0    0     0    84 1036  678  6  1 93  1  0
+ 1  0      8  70944 521984 6019544    0    0     0    64 1026  698  9  1 89  1  0
+ 0  0      8  70944 521984 6019552    0    0     0   140 1042  702 10  0 88  2  0
+ 0  0      8  70944 521984 6019568    0    0     0     0 1006  574  0  0 100  0  0
+ 0  0      8  71108 521984 6019572    0    0     0     0 1004  573  0  0 100  0  0
+ 0  0      8  71116 521984 6019572    0    0     0   100 1027  584  0  1 97  2  0
+</code></pre>
+
+<p><strong>问：为什么cs(上下文)和系统cpu占用有明显变化?</strong></p>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pages = [];
+            //path
+            var path = "tbc.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.pages.length; ++i)
+                if (path == data.pages[i].path) {
+                    now = i;
+                    pages.push({"select": true, "path": data.pages[i].path, "title": data.pages[i].title});
+                }
+                else {
+                    pages.push({"select": false, "path": data.pages[i].path, "title": data.pages[i].title});
+                }
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": pages});
+            $("#pages").append(pagesHtml);
+            var post = data.pages[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+</body>
+</html>
