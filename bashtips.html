@@ -81,6 +81,11 @@ date -d "-1 day" +%F
 echo "scale=2;1.23+4.56"|bc
 ~~~~
 
+* grep 找IP
+~~~~{bash}
+grep '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}' SOMEFILE
+~~~~
+
 
 
 <!-- markdown end -->
@@ -147,6 +152,13 @@ cd <span class="token operator">/</span>proc<span class="token operator">/</span
 </ul>
 
 <pre class=" language-bash"><code class=" language-bash"><span class="token keyword">echo</span> <span class="token string">"scale=2;1.23+4.56"</span><span class="token operator">|</span>bc
+</code></pre>
+
+<ul>
+<li>grep 找IP</li>
+</ul>
+
+<pre class=" language-bash"><code class=" language-bash">grep <span class="token string">'[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'</span> SOMEFILE
 </code></pre>
 <!-- content end -->
 </div>
