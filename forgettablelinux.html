@@ -45,6 +45,10 @@ echo "*    hard    nofile    4096" >> /etc/security/limits.conf
 
 查看帐号密码过期情况：`chage -l someaccount`，其余配置参考man。
 
+配置密码用不过期：`chage -M -1 someaccount`
+
+
+
 
 <!-- markdown end -->
 </div>
@@ -73,6 +77,8 @@ echo "*    hard    nofile    4096" >> /etc/security/limits.conf
 <p><code>/etc/login.defs</code> 配置只影响修改该文件后建立的帐号</p>
 
 <p>查看帐号密码过期情况：<code>chage -l someaccount</code>，其余配置参考man。</p>
+
+<p>配置密码用不过期：<code>chage -M -1 someaccount</code></p>
 <!-- content end -->
 </div>
 <br>
