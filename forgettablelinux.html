@@ -47,6 +47,7 @@ echo "*    hard    nofile    4096" >> /etc/security/limits.conf
 
 配置密码用不过期：`chage -M -1 someaccount`
 
+（CentOS 5) /etc/pam.d/system-auth中pam_cracklib.so库可以定义密码复杂度规则，具体请看`/usr/share/doc/pam-0.99.6.2/html/sag-pam_cracklib.html`。**注意**： 该规则只对普通用户修改自己密码时生效，root用户若分配了弱密码不能生效。
 
 
 
@@ -79,6 +80,8 @@ echo "*    hard    nofile    4096" >> /etc/security/limits.conf
 <p>查看帐号密码过期情况：<code>chage -l someaccount</code>，其余配置参考man。</p>
 
 <p>配置密码用不过期：<code>chage -M -1 someaccount</code></p>
+
+<p>（CentOS 5) /etc/pam.d/system-auth中pam_cracklib.so库可以定义密码复杂度规则，具体请看<code>/usr/share/doc/pam-0.99.6.2/html/sag-pam_cracklib.html</code>。<strong>注意</strong>： 该规则只对普通用户修改自己密码时生效，root用户若分配了弱密码不能生效。</p>
 <!-- content end -->
 </div>
 <br>
