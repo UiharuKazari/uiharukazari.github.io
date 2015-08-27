@@ -37,7 +37,15 @@ echo "*    soft    nofile    4096" >> /etc/security/limits.conf
 echo "*    hard    nofile    4096" >> /etc/security/limits.conf
 ~~~~
 
-*
+* 账户安全相关
+
+`chage` 设置帐号密码过期策略
+
+`/etc/login.defs` 配置只影响修改该文件后建立的帐号
+
+查看帐号密码过期情况：`chage -l someaccount`，其余配置参考man。
+
+
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
@@ -56,7 +64,15 @@ echo "*    hard    nofile    4096" >> /etc/security/limits.conf
 <span class="token keyword">echo</span> <span class="token string">"*    hard    nofile    4096"</span> <span class="token operator">&gt;</span><span class="token operator">&gt;</span> <span class="token operator">/</span>etc<span class="token operator">/</span>security<span class="token operator">/</span>limits<span class="token punctuation">.</span>conf
 </code></pre>
 
-<p>*</p>
+<ul>
+<li>账户安全相关</li>
+</ul>
+
+<p><code>chage</code> 设置帐号密码过期策略</p>
+
+<p><code>/etc/login.defs</code> 配置只影响修改该文件后建立的帐号</p>
+
+<p>查看帐号密码过期情况：<code>chage -l someaccount</code>，其余配置参考man。</p>
 <!-- content end -->
 </div>
 <br>
