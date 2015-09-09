@@ -1,0 +1,300 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+			<h1>
+            <a href="/" id="title"></a>
+			</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+咱的WEB架构中nginx用于后端处理http请求，最近遇到了一些问题，放着不管会有风险，遂研究一下。
+
+列两篇nginx方面书籍：
+
+* [Nginx开发入门到精通](http://tengine.taobao.org/book/)
+* [深入理解Nginx](http://vdisk.weibo.com/s/ujp0L-rkuQ6cX)
+
+两个问题：
+
+* 如何控制.git目录的访问 `[风险级别低]`
+* 503触发的原理，如何通过配置调优 `[风险级别高]`
+
+##安装
+
+参考官方文档：[here](http://nginx.org/en/docs/configure.html)
+
+生产环境使用nginx版本：`nginx-1.6.2-23.el7.art.x86_64`，在官方网站上找了近似版本[源码](http://nginx.org/download/nginx-1.6.2.tar.gz)。
+
+下载到工作目录 `/home/zfx/Work/nginx`，解压，编译：
+
+
+~~~~{bash}
+./configure --prefix=/home/zfx/Work/nginx/nginx-1.6.2
+~~~~
+
+报错：
+
+```
+./configure: error: the HTTP rewrite module requires the PCRE library.
+You can either disable the module by using --without-http_rewrite_module
+option, or install the PCRE library into the system, or build the PCRE library
+statically from the source with nginx by using --with-pcre=<path> option.
+```
+
+下载合适版本的[pcre](http://sourceforge.net/projects/pcre/files/pcre/8.32/pcre-8.32.tar.gz/download)。
+
+再次编译:
+~~~~{bash}
+./configure --prefix=/home/zfx/Work/nginx/nginx-1.6.2 --with-pcre=../pcre-8.32
+~~~~
+
+报错：
+```
+./configure: error: the HTTP rewrite module requires the PCRE library.
+You can either disable the module by using --without-http_rewrite_module
+option, or install the PCRE library into the system, or build the PCRE library
+statically from the source with nginx by using --with-pcre=<path> option.
+```
+
+下载合适版本的zlib，安装文档中要求版本1.1.3-1.2.7，但官方网站上只能找到1.2.8的[link](http://zlib.net/zlib-1.2.8.tar.gz)，尝试一下。
+
+再再次编译:
+~~~~{bash}
+./configure --prefix=/home/zfx/Work/nginx/nginx-1.6.2 --with-pcre=../pcre-8.32 --with-zlib=../zlib-1.2.8
+make
+make install
+~~~~
+
+安装成功。
+
+##目录访问控制
+修改/home/zfx/Work/nginx/nginx-1.6.2/conf/nginx.conf中监听端口为88，启动nginx:
+~~~~{bash}
+sudo ./sbin/nginx
+~~~~
+
+创建两个目录，并在相应目录下新建文件：
+~~~~{bash}
+cd html
+mkdir dira dirb .dirc
+echo "filea content" > dirb/filea.html
+echo "fileb content" > dirb/fileb.html
+echo "filec content" > .dirc/filec.html
+~~~~
+
+在nginx.conf中添加配置：
+```
+        location /dirb {
+            deny all;
+        }
+    
+        location ~ /\.dirc {
+            deny all;
+        }
+```
+
+重启:
+~~~~{bash}
+sudo ./sbin/nginx -s reload
+~~~~
+
+这样访问dira/filea.html正常，而b和c都会返回403。`测试环境上我做了如上配置后还一直能访问是因为chrome的缓存，浪费了大把时间，坑死爹了。`
+
+##503问题
+
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<p>咱的WEB架构中nginx用于后端处理http请求，最近遇到了一些问题，放着不管会有风险，遂研究一下。</p>
+
+<p>列两篇nginx方面书籍：</p>
+
+<ul>
+<li><a href="http://tengine.taobao.org/book/">Nginx开发入门到精通</a></li>
+<li><a href="http://vdisk.weibo.com/s/ujp0L-rkuQ6cX">深入理解Nginx</a></li>
+</ul>
+
+<p>两个问题：</p>
+
+<ul>
+<li>如何控制.git目录的访问 <code>[风险级别低]</code></li>
+<li>503触发的原理，如何通过配置调优 <code>[风险级别高]</code></li>
+</ul>
+
+<h2 id="">安装</h2>
+
+<p>参考官方文档：<a href="http://nginx.org/en/docs/configure.html">here</a></p>
+
+<p>生产环境使用nginx版本：<code>nginx-1.6.2-23.el7.art.x86_64</code>，在官方网站上找了近似版本<a href="http://nginx.org/download/nginx-1.6.2.tar.gz">源码</a>。</p>
+
+<p>下载到工作目录 <code>/home/zfx/Work/nginx</code>，解压，编译：</p>
+
+<pre class=" language-bash"><code class=" language-bash"><span class="token punctuation">.</span><span class="token operator">/</span>configure <span class="token operator">--</span>prefix<span class="token operator">=</span><span class="token operator">/</span>home<span class="token operator">/</span>zfx<span class="token operator">/</span>Work<span class="token operator">/</span>nginx<span class="token operator">/</span>nginx<span class="token number">-1.6</span><span class="token punctuation">.</span><span class="token number">2</span>
+</code></pre>
+
+<p>报错：</p>
+
+<pre><code>./configure: error: the HTTP rewrite module requires the PCRE library.
+You can either disable the module by using --without-http_rewrite_module
+option, or install the PCRE library into the system, or build the PCRE library
+statically from the source with nginx by using --with-pcre=&lt;path&gt; option.
+</code></pre>
+
+<p>下载合适版本的<a href="http://sourceforge.net/projects/pcre/files/pcre/8.32/pcre-8.32.tar.gz/download">pcre</a>。</p>
+
+<p>再次编译:</p>
+
+<pre class=" language-bash"><code class=" language-bash"><span class="token punctuation">.</span><span class="token operator">/</span>configure <span class="token operator">--</span>prefix<span class="token operator">=</span><span class="token operator">/</span>home<span class="token operator">/</span>zfx<span class="token operator">/</span>Work<span class="token operator">/</span>nginx<span class="token operator">/</span>nginx<span class="token number">-1.6</span><span class="token punctuation">.</span><span class="token number">2</span> <span class="token operator">--</span>with<span class="token operator">-</span>pcre<span class="token operator">=</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token operator">/</span>pcre<span class="token number">-8.32</span>
+</code></pre>
+
+<p>报错：</p>
+
+<pre><code>./configure: error: the HTTP rewrite module requires the PCRE library.
+You can either disable the module by using --without-http_rewrite_module
+option, or install the PCRE library into the system, or build the PCRE library
+statically from the source with nginx by using --with-pcre=&lt;path&gt; option.
+</code></pre>
+
+<p>下载合适版本的zlib，安装文档中要求版本1.1.3-1.2.7，但官方网站上只能找到1.2.8的<a href="http://zlib.net/zlib-1.2.8.tar.gz">link</a>，尝试一下。</p>
+
+<p>再再次编译:</p>
+
+<pre class=" language-bash"><code class=" language-bash"><span class="token punctuation">.</span><span class="token operator">/</span>configure <span class="token operator">--</span>prefix<span class="token operator">=</span><span class="token operator">/</span>home<span class="token operator">/</span>zfx<span class="token operator">/</span>Work<span class="token operator">/</span>nginx<span class="token operator">/</span>nginx<span class="token number">-1.6</span><span class="token punctuation">.</span><span class="token number">2</span> <span class="token operator">--</span>with<span class="token operator">-</span>pcre<span class="token operator">=</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token operator">/</span>pcre<span class="token number">-8.32</span> <span class="token operator">--</span>with<span class="token operator">-</span>zlib<span class="token operator">=</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token operator">/</span>zlib<span class="token number">-1.2</span><span class="token punctuation">.</span><span class="token number">8</span>
+make
+make install
+</code></pre>
+
+<p>安装成功。</p>
+
+<h2 id="">目录访问控制</h2>
+
+<p>修改/home/zfx/Work/nginx/nginx-1.6.2/conf/nginx.conf中监听端口为88，启动nginx:</p>
+
+<pre class=" language-bash"><code class=" language-bash">sudo <span class="token punctuation">.</span><span class="token operator">/</span>sbin<span class="token operator">/</span>nginx
+</code></pre>
+
+<p>创建两个目录，并在相应目录下新建文件：</p>
+
+<pre class=" language-bash"><code class=" language-bash">cd html
+mkdir dira dirb <span class="token punctuation">.</span>dirc
+<span class="token keyword">echo</span> <span class="token string">"filea content"</span> <span class="token operator">&gt;</span> dirb<span class="token operator">/</span>filea<span class="token punctuation">.</span>html
+<span class="token keyword">echo</span> <span class="token string">"fileb content"</span> <span class="token operator">&gt;</span> dirb<span class="token operator">/</span>fileb<span class="token punctuation">.</span>html
+<span class="token keyword">echo</span> <span class="token string">"filec content"</span> <span class="token operator">&gt;</span> <span class="token punctuation">.</span>dirc<span class="token operator">/</span>filec<span class="token punctuation">.</span>html
+</code></pre>
+
+<p>在nginx.conf中添加配置：</p>
+
+<pre><code>        location /dirb {
+            deny all;
+        }
+
+        location ~ /\.dirc {
+            deny all;
+        }
+</code></pre>
+
+<p>重启:</p>
+
+<pre class=" language-bash"><code class=" language-bash">sudo <span class="token punctuation">.</span><span class="token operator">/</span>sbin<span class="token operator">/</span>nginx <span class="token operator">-</span>s reload
+</code></pre>
+
+<p>这样访问dira/filea.html正常，而b和c都会返回403。<code>测试环境上我做了如上配置后还一直能访问是因为chrome的缓存，浪费了大把时间，坑死爹了。</code></p>
+
+<h2 id="503">503问题</h2>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pages = [];
+            //path
+            var path = "nginx.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.pages.length; ++i)
+                if (path == data.pages[i].path) {
+                    now = i;
+                    pages.push({"select": true, "path": data.pages[i].path, "title": data.pages[i].title});
+                }
+                else {
+                    pages.push({"select": false, "path": data.pages[i].path, "title": data.pages[i].title});
+                }
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": pages});
+            $("#pages").append(pagesHtml);
+            var post = data.pages[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+</body>
+</html>
