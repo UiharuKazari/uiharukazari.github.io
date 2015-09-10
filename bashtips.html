@@ -86,6 +86,51 @@ echo "scale=2;1.23+4.56"|bc
 grep '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}' SOMEFILE
 ~~~~
 
+* 自动抓取密码登陆 (2015-09-10) -- 超级懒的管理员
+~~~~{bash}
+#!/bin/bash
+#BUG: 偶尔不会触发sudo
+
+line=`openssl enc -d -des3 -a -salt -in /home/zfx/Work/LAZY/server.info.ciper | grep $1`
+
+#line=`cat /home/zfx/Work/LAZY/server.info | grep $1`
+
+ip=$1
+user=`echo $line| awk '{print $2}'`
+pass=`echo $line| awk '{print $3}'`
+port=`echo $line| awk '{print $4}'`
+
+auto_login_ssh(){
+expect -c "
+set timeout 1
+
+spawn ssh $2@$1 -p $4
+expect {
+    \"(yes/no)\" { send \"yes\r\"; exp_continue }
+    \"assword:\" { send \"$3\r\" }
+}
+expect "$2@*"   { send \"sudo -i\r\" }  ;
+expect \"password for\" { send \"$3\r\" } ;
+interact
+"
+}
+
+auto_login_ssh $ip $user $pass $port
+~~~~
+
+明文密码位于server.info中，文件使用vim加密，格式如：
+```
+10.1.101.11 st_admin h6xxxxxxMj 57644
+```
+依次是ip，用户名，密码，端口。
+
+密文密码由openssl加密得到，口令为我个人的常用密码：
+~~~~{bash}
+openssl enc -des3 -a -salt -in server.info -out server.info.ciper
+~~~~
+
+脚本先通过openssl解密(需要我手动输入个人密码)，然后抓取到对应服务器的行，分割解析，用expect自动拼成ssh登陆命令并自动输入密码，再自动使用sudo切换到root权限。注意：expect可能需要安装。
+
 
 
 <!-- markdown end -->
@@ -160,6 +205,54 @@ cd <span class="token operator">/</span>proc<span class="token operator">/</span
 
 <pre class=" language-bash"><code class=" language-bash">grep <span class="token string">'[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'</span> SOMEFILE
 </code></pre>
+
+<ul>
+<li>自动抓取密码登陆 (2015-09-10) -- 超级懒的管理员</li>
+</ul>
+
+<pre class=" language-bash"><code class=" language-bash"><span class="token important">#!/bin/bash</span>
+<span class="token comment" spellcheck="true">#BUG: 偶尔不会触发sudo
+</span>
+line<span class="token operator">=</span>`openssl enc <span class="token operator">-</span>d <span class="token operator">-</span>des3 <span class="token operator">-</span>a <span class="token operator">-</span>salt <span class="token operator">-</span><span class="token keyword">in</span> <span class="token operator">/</span>home<span class="token operator">/</span>zfx<span class="token operator">/</span>Work<span class="token operator">/</span>LAZY<span class="token operator">/</span>server<span class="token punctuation">.</span>info<span class="token punctuation">.</span>ciper <span class="token operator">|</span> grep <span class="token property">$1</span>`
+
+<span class="token comment" spellcheck="true">#line=`cat /home/zfx/Work/LAZY/server.info | grep $1`
+</span>
+ip<span class="token operator">=</span><span class="token property">$1</span>
+user<span class="token operator">=</span>`<span class="token keyword">echo</span> <span class="token property">$line</span><span class="token operator">|</span> awk <span class="token string">'{print <span class="token property">$2</span>}'</span>`
+pass<span class="token operator">=</span>`<span class="token keyword">echo</span> <span class="token property">$line</span><span class="token operator">|</span> awk <span class="token string">'{print <span class="token property">$3</span>}'</span>`
+port<span class="token operator">=</span>`<span class="token keyword">echo</span> <span class="token property">$line</span><span class="token operator">|</span> awk <span class="token string">'{print <span class="token property">$4</span>}'</span>`
+
+<span class="token function">auto_login_ssh<span class="token punctuation">(</span></span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+expect <span class="token operator">-</span>c <span class="token string">"
+set timeout 1
+
+spawn ssh <span class="token property">$2@</span><span class="token property">$1</span> -p <span class="token property">$4</span>
+expect {
+    \"(yes/no)\" { send \"yes\r\"; exp_continue }
+    \"assword:\" { send \"<span class="token property">$3</span>\r\" }
+}
+expect "</span><span class="token property">$2@*</span><span class="token string">"   { send \"sudo -i\r\" }  ;
+expect \"password for\" { send \"<span class="token property">$3</span>\r\" } ;
+interact
+"</span>
+<span class="token punctuation">}</span>
+
+auto_login_ssh <span class="token property">$ip</span> <span class="token property">$user</span> <span class="token property">$pass</span> <span class="token property">$port</span>
+</code></pre>
+
+<p>明文密码位于server.info中，文件使用vim加密，格式如：</p>
+
+<pre><code>10.1.101.11 st_admin h6xxxxxxMj 57644
+</code></pre>
+
+<p>依次是ip，用户名，密码，端口。</p>
+
+<p>密文密码由openssl加密得到，口令为我个人的常用密码：</p>
+
+<pre class=" language-bash"><code class=" language-bash">openssl enc <span class="token operator">-</span>des3 <span class="token operator">-</span>a <span class="token operator">-</span>salt <span class="token operator">-</span><span class="token keyword">in</span> server<span class="token punctuation">.</span>info <span class="token operator">-</span>out server<span class="token punctuation">.</span>info<span class="token punctuation">.</span>ciper
+</code></pre>
+
+<p>脚本先通过openssl解密(需要我手动输入个人密码)，然后抓取到对应服务器的行，分割解析，用expect自动拼成ssh登陆命令并自动输入密码，再自动使用sudo切换到root权限。注意：expect可能需要安装。</p>
 <!-- content end -->
 </div>
 <br>
