@@ -183,6 +183,15 @@ do
 done
 ~~~~
 
+* sed 处理第三个冒号
+~~~~{bash}
+echo ":04:00:1621"|sed "s/:/-/3"
+~~~~
+
+输出: `:04:00-1621`
+
+
+
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
@@ -356,6 +365,15 @@ auto_login_ssh <span class="token property">$ip</span> <span class="token proper
     <span class="token keyword">done</span>
 <span class="token keyword">done</span>
 </code></pre>
+
+<ul>
+<li>sed 处理第三个冒号</li>
+</ul>
+
+<pre class=" language-bash"><code class=" language-bash"><span class="token keyword">echo</span> <span class="token string">":04:00:1621"</span><span class="token operator">|</span>sed <span class="token string">"s/:/-/3"</span>
+</code></pre>
+
+<p>输出: <code>:04:00-1621</code></p>
 <!-- content end -->
 </div>
 <br>
