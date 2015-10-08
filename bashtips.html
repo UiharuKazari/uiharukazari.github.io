@@ -131,7 +131,57 @@ openssl enc -des3 -a -salt -in server.info -out server.info.ciper
 
 脚本先通过openssl解密(需要我手动输入个人密码)，然后抓取到对应服务器的行，分割解析，用expect自动拼成ssh登陆命令并自动输入密码，再自动使用sudo切换到root权限。注意：expect可能需要安装。
 
+* bash 遍历时间
 
+输出：
+```
+        ...
+
+:00:50:
+:00:51:
+:00:52:
+:00:53:
+:00:54:
+:00:55:
+:00:56:
+:00:57:
+:00:58:
+:00:59:
+:01:00:
+:01:01:
+:01:02:
+:01:03:
+:01:04:
+:01:05:
+:01:06:
+
+        ... 
+
+```
+~~~~{bash}
+for ((h=0;h<=23;h++))
+do
+    for ((m=0;m<=59;m++))
+    do
+        if [ ${h} -lt 10 ]
+        then
+            if [ ${m} -lt 10 ]
+            then
+                echo :0${h}:0${m}:
+            else
+                echo :0${h}:${m}:
+            fi
+        else
+            if [ ${m} -lt 10 ]
+            then
+                echo :${h}:0${m}:
+            else
+                echo :${h}:${m}:
+            fi
+        fi
+    done
+done
+~~~~
 
 <!-- markdown end -->
 </div>
@@ -253,6 +303,59 @@ auto_login_ssh <span class="token property">$ip</span> <span class="token proper
 </code></pre>
 
 <p>脚本先通过openssl解密(需要我手动输入个人密码)，然后抓取到对应服务器的行，分割解析，用expect自动拼成ssh登陆命令并自动输入密码，再自动使用sudo切换到root权限。注意：expect可能需要安装。</p>
+
+<ul>
+<li>bash 遍历时间</li>
+</ul>
+
+<p>输出：</p>
+
+<pre><code>        ...
+
+:00:50:
+:00:51:
+:00:52:
+:00:53:
+:00:54:
+:00:55:
+:00:56:
+:00:57:
+:00:58:
+:00:59:
+:01:00:
+:01:01:
+:01:02:
+:01:03:
+:01:04:
+:01:05:
+:01:06:
+
+        ... 
+</code></pre>
+
+<pre class=" language-bash"><code class=" language-bash"><span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>h<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>h<span class="token operator">&lt;=</span><span class="token number">23</span><span class="token punctuation">;</span>h<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token keyword">do</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>m<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>m<span class="token operator">&lt;=</span><span class="token number">59</span><span class="token punctuation">;</span>m<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token keyword">do</span>
+        <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token property">${h}</span> <span class="token operator">-</span>lt <span class="token number">10</span> <span class="token punctuation">]</span>
+        <span class="token keyword">then</span>
+            <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token property">${m}</span> <span class="token operator">-</span>lt <span class="token number">10</span> <span class="token punctuation">]</span>
+            <span class="token keyword">then</span>
+                <span class="token keyword">echo</span> <span class="token punctuation">:</span><span class="token number">0</span><span class="token property">${h}</span><span class="token punctuation">:</span><span class="token number">0</span><span class="token property">${m}</span><span class="token punctuation">:</span>
+            <span class="token keyword">else</span>
+                <span class="token keyword">echo</span> <span class="token punctuation">:</span><span class="token number">0</span><span class="token property">${h}</span><span class="token punctuation">:</span><span class="token property">${m}</span><span class="token punctuation">:</span>
+            <span class="token keyword">fi</span>
+        <span class="token keyword">else</span>
+            <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token property">${m}</span> <span class="token operator">-</span>lt <span class="token number">10</span> <span class="token punctuation">]</span>
+            <span class="token keyword">then</span>
+                <span class="token keyword">echo</span> <span class="token punctuation">:</span><span class="token property">${h}</span><span class="token punctuation">:</span><span class="token number">0</span><span class="token property">${m}</span><span class="token punctuation">:</span>
+            <span class="token keyword">else</span>
+                <span class="token keyword">echo</span> <span class="token punctuation">:</span><span class="token property">${h}</span><span class="token punctuation">:</span><span class="token property">${m}</span><span class="token punctuation">:</span>
+            <span class="token keyword">fi</span>
+        <span class="token keyword">fi</span>
+    <span class="token keyword">done</span>
+<span class="token keyword">done</span>
+</code></pre>
 <!-- content end -->
 </div>
 <br>
