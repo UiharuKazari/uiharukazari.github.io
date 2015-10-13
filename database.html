@@ -27,12 +27,19 @@
 <!-- markdown -->
 * `[Mysql]` 错误：The last packet successfully received from the server was xxx milliseconds ago.  The last packet sent successfully to the server was 0 milliseconds ago.
 
-参考： <br>
-http://blog.csdn.net/bluesnail216/article/details/15810119
+参考： 
+[1](http://blog.csdn.net/bluesnail216/article/details/15810119) [2](http://www.cnblogs.com/davidwang456/p/4425913.html) [3](http://blog.csdn.net/jebe7282/article/details/5639778)
 
-http://www.cnblogs.com/davidwang456/p/4425913.html
+出错的原因为mysql的超时值过小，导致连接被mysql认为已释放，而java(jdbc,spring,...)认为连接还可用。
 
-http://blog.csdn.net/jebe7282/article/details/5639778
+注意JDBC的配置方法:
+~~~~{xml}
+<property name="driverUrl" value="${db.databaseurl}?characterEncoding=utf-8&amp;autoReconnect=true" />
+~~~~
+
+xml文件中`&`需要转义为`&amp;`
+
+
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
@@ -41,12 +48,17 @@ http://blog.csdn.net/jebe7282/article/details/5639778
 <li><code>[Mysql]</code> 错误：The last packet successfully received from the server was xxx milliseconds ago.  The last packet sent successfully to the server was 0 milliseconds ago.</li>
 </ul>
 
-<p>参考： <br>
-http://blog.csdn.net/bluesnail216/article/details/15810119</p>
+<p>参考： 
+<a href="http://blog.csdn.net/bluesnail216/article/details/15810119">1</a> <a href="http://www.cnblogs.com/davidwang456/p/4425913.html">2</a> <a href="http://blog.csdn.net/jebe7282/article/details/5639778">3</a></p>
 
-<p>http://www.cnblogs.com/davidwang456/p/4425913.html</p>
+<p>出错的原因为mysql的超时值过小，导致连接被mysql认为已释放，而java(jdbc,spring,...)认为连接还可用。</p>
 
-<p>http://blog.csdn.net/jebe7282/article/details/5639778</p>
+<p>注意JDBC的配置方法:</p>
+
+<pre><code class="language-xml">&lt;property name="driverUrl" value="${db.databaseurl}?characterEncoding=utf-8&amp;autoReconnect=true" /&gt;
+</code></pre>
+
+<p>xml文件中<code>&amp;</code>需要转义为<code>&amp;amp;</code></p>
 <!-- content end -->
 </div>
 <br>
