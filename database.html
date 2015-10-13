@@ -49,6 +49,36 @@ xml文件中`&`需要转义为`&amp;`
         </bean>
 ~~~~
 
+* `SqlServer 2005` 查询数据库最近执行语句：
+
+~~~~{sql}
+SELECT TOP 100 
+--创建时间 
+QS.creation_time, 
+--查询语句 
+SUBSTRING(ST.text,(QS.statement_start_offset/2)+1, 
+((CASE QS.statement_end_offset WHEN -1 THEN DATALENGTH(st.text) 
+ELSE QS.statement_end_offset END - QS.statement_start_offset)/2) + 1 
+) AS statement_text, 
+--执行文本 
+ST.text, 
+--执行计划 
+QS.total_worker_time, 
+QS.last_worker_time, 
+QS.max_worker_time, 
+QS.min_worker_time 
+FROM 
+sys.dm_exec_query_stats QS 
+--关键字 
+CROSS APPLY 
+sys.dm_exec_sql_text(QS.sql_handle) ST 
+WHERE 
+QS.creation_time BETWEEN '2015-10-13 09:00:00' AND '2015-10-13 23:00:00' 
+--AND ST.text LIKE '%%' 
+ORDER BY 
+QS.creation_time DESC
+~~~~
+
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
@@ -76,6 +106,37 @@ xml文件中`&`需要转义为`&amp;`
         &lt;/property&gt;
 &lt;property name="testBeforeUse" value="true" /&gt;
         &lt;/bean&gt;
+</code></pre>
+
+<ul>
+<li><code>SqlServer 2005</code> 查询数据库最近执行语句：</li>
+</ul>
+
+<pre class=" language-sql"><code class=" language-sql"><span class="token keyword">SELECT</span> <span class="token keyword">TOP</span> <span class="token number">100</span> 
+<span class="token comment" spellcheck="true">--创建时间 
+</span>QS<span class="token punctuation">.</span>creation_time<span class="token punctuation">,</span> 
+<span class="token comment" spellcheck="true">--查询语句 
+</span>SUBSTRING<span class="token punctuation">(</span>ST<span class="token punctuation">.</span><span class="token keyword">text</span><span class="token punctuation">,</span><span class="token punctuation">(</span>QS<span class="token punctuation">.</span>statement_start_offset<span class="token operator">/</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">,</span> 
+<span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">CASE</span> QS<span class="token punctuation">.</span>statement_end_offset <span class="token keyword">WHEN</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token keyword">THEN</span> DATALENGTH<span class="token punctuation">(</span>st<span class="token punctuation">.</span><span class="token keyword">text</span><span class="token punctuation">)</span> 
+<span class="token keyword">ELSE</span> QS<span class="token punctuation">.</span>statement_end_offset <span class="token keyword">END</span> <span class="token operator">-</span> QS<span class="token punctuation">.</span>statement_start_offset<span class="token punctuation">)</span><span class="token operator">/</span><span class="token number">2</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">1</span> 
+<span class="token punctuation">)</span> <span class="token keyword">AS</span> statement_text<span class="token punctuation">,</span> 
+<span class="token comment" spellcheck="true">--执行文本 
+</span>ST<span class="token punctuation">.</span><span class="token keyword">text</span><span class="token punctuation">,</span> 
+<span class="token comment" spellcheck="true">--执行计划 
+</span>QS<span class="token punctuation">.</span>total_worker_time<span class="token punctuation">,</span> 
+QS<span class="token punctuation">.</span>last_worker_time<span class="token punctuation">,</span> 
+QS<span class="token punctuation">.</span>max_worker_time<span class="token punctuation">,</span> 
+QS<span class="token punctuation">.</span>min_worker_time 
+<span class="token keyword">FROM</span> 
+sys<span class="token punctuation">.</span>dm_exec_query_stats QS 
+<span class="token comment" spellcheck="true">--关键字 
+</span><span class="token keyword">CROSS</span> <span class="token keyword">APPLY</span> 
+sys<span class="token punctuation">.</span>dm_exec_sql_text<span class="token punctuation">(</span>QS<span class="token punctuation">.</span>sql_handle<span class="token punctuation">)</span> ST 
+<span class="token keyword">WHERE</span> 
+QS<span class="token punctuation">.</span>creation_time <span class="token operator">BETWEEN</span> <span class="token string">'2015-10-13 09:00:00'</span> <span class="token operator">AND</span> <span class="token string">'2015-10-13 23:00:00'</span> 
+<span class="token comment" spellcheck="true">--AND ST.text LIKE '%%' 
+</span><span class="token keyword">ORDER</span> <span class="token keyword">BY</span> 
+QS<span class="token punctuation">.</span>creation_time <span class="token keyword">DESC</span>
 </code></pre>
 <!-- content end -->
 </div>
