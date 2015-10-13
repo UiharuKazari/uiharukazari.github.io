@@ -39,6 +39,15 @@
 
 xml文件中`&`需要转义为`&amp;`
 
+*补充：上述配置在实际环境中未能达到理想效果，后添加配置解决：(oracle需要添加from dual）*
+
+~~~~{xml}
+<property name="houseKeepingTestSql">
+            <value>select 1</value>
+        </property>
+<property name="testBeforeUse" value="true" />
+        </bean>
+~~~~
 
 <!-- markdown end -->
 </div>
@@ -59,6 +68,15 @@ xml文件中`&`需要转义为`&amp;`
 </code></pre>
 
 <p>xml文件中<code>&amp;</code>需要转义为<code>&amp;amp;</code></p>
+
+<p><em>补充：上述配置在实际环境中未能达到理想效果，后添加配置解决：(oracle需要添加from dual）</em></p>
+
+<pre><code class="language-xml">&lt;property name="houseKeepingTestSql"&gt;
+            &lt;value&gt;select 1&lt;/value&gt;
+        &lt;/property&gt;
+&lt;property name="testBeforeUse" value="true" /&gt;
+        &lt;/bean&gt;
+</code></pre>
 <!-- content end -->
 </div>
 <br>
