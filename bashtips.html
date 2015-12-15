@@ -190,6 +190,29 @@ echo ":04:00:1621"|sed "s/:/-/3"
 
 输出: `:04:00-1621`
 
+* swaks 自动发邮件
+~~~~{bash}
+#!/bin/bash
+
+echo ----------`date` CRONTAB BEGIN ----------
+
+SPATH=/home/guangda/Axway/Synchrony/SecureClient
+YDAY=`date -d "-1 day" +"%Y%m%d"`
+BYDAY=`date -d "-2 day" +"%Y%m%d"`
+GETFILE=SCST_${YDAY}_1.txt
+
+sed -i "s/${BYDAY}/${YDAY}/g" ${SPATH}/get
+
+${SPATH}/sclient script ${SPATH}/get
+
+sleep 60
+
+export LANG=zh_CN.UTF-8 && echo "guxiang_00" | swaks -f "zhangfuxing@shangtong.com" --auth-user zhangfuxing@shangtong.com -t "fsbin@shangtong.com" -h "shangtong.com" --header "Subject: 光大对账文件${YDAY}" --body "见附件" --attach /home/guangda/${GETFILE}
+
+echo ----------`date` CRONTAB END ----------
+~~~~
+
+
 
 
 <!-- markdown end -->
@@ -374,6 +397,30 @@ auto_login_ssh <span class="token property">$ip</span> <span class="token proper
 </code></pre>
 
 <p>输出: <code>:04:00-1621</code></p>
+
+<ul>
+<li>swaks 自动发邮件</li>
+</ul>
+
+<pre class=" language-bash"><code class=" language-bash"><span class="token important">#!/bin/bash</span>
+
+<span class="token keyword">echo</span> <span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span>`date` CRONTAB BEGIN <span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span>
+
+SPATH<span class="token operator">=</span><span class="token operator">/</span>home<span class="token operator">/</span>guangda<span class="token operator">/</span>Axway<span class="token operator">/</span>Synchrony<span class="token operator">/</span>SecureClient
+YDAY<span class="token operator">=</span>`date <span class="token operator">-</span>d <span class="token string">"-1 day"</span> <span class="token operator">+</span><span class="token string">"%Y%m%d"</span>`
+BYDAY<span class="token operator">=</span>`date <span class="token operator">-</span>d <span class="token string">"-2 day"</span> <span class="token operator">+</span><span class="token string">"%Y%m%d"</span>`
+GETFILE<span class="token operator">=</span>SCST_<span class="token property">${YDAY}</span>_1<span class="token punctuation">.</span>txt
+
+sed <span class="token operator">-</span>i <span class="token string">"s/<span class="token property">${BYDAY}</span>/<span class="token property">${YDAY}</span>/g"</span> <span class="token property">${SPATH}</span><span class="token operator">/</span>get
+
+<span class="token property">${SPATH}</span><span class="token operator">/</span>sclient script <span class="token property">${SPATH}</span><span class="token operator">/</span>get
+
+sleep <span class="token number">60</span>
+
+export LANG<span class="token operator">=</span>zh_CN<span class="token punctuation">.</span>UTF<span class="token number">-8</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">echo</span> <span class="token string">"guxiang_00"</span> <span class="token operator">|</span> swaks <span class="token operator">-</span>f <span class="token string">"zhangfuxing@shangtong.com"</span> <span class="token operator">--</span>auth<span class="token operator">-</span>user zhangfuxing@shangtong<span class="token punctuation">.</span>com <span class="token operator">-</span>t <span class="token string">"fsbin@shangtong.com"</span> <span class="token operator">-</span>h <span class="token string">"shangtong.com"</span> <span class="token operator">--</span>header <span class="token string">"Subject: 光大对账文件<span class="token property">${YDAY}</span>"</span> <span class="token operator">--</span>body <span class="token string">"见附件"</span> <span class="token operator">--</span>attach <span class="token operator">/</span>home<span class="token operator">/</span>guangda<span class="token operator">/</span><span class="token property">${GETFILE}</span>
+
+<span class="token keyword">echo</span> <span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span>`date` CRONTAB END <span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span>
+</code></pre>
 <!-- content end -->
 </div>
 <br>
