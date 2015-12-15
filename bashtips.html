@@ -190,7 +190,7 @@ echo ":04:00:1621"|sed "s/:/-/3"
 
 输出: `:04:00-1621`
 
-* swaks 自动发邮件
+* swaks(perl脚本) 自动发邮件
 ~~~~{bash}
 #!/bin/bash
 
@@ -207,12 +207,12 @@ ${SPATH}/sclient script ${SPATH}/get
 
 sleep 60
 
-export LANG=zh_CN.UTF-8 && echo "guxiang_00" | swaks -f "zhangfuxing@shangtong.com" --auth-user zhangfuxing@shangtong.com -t "fsbin@shangtong.com" -h "shangtong.com" --header "Subject: 光大对账文件${YDAY}" --body "见附件" --attach /home/guangda/${GETFILE}
+export LANG=zh_CN.UTF-8 && echo "mailpassword" | swaks -f "frommail@xx.com" --auth-user frommail@xx.com -t "tomail@xx.com" -h "xx.com" --header "Subject: xxxxxx${YDAY}" --body "见附件" --attach /home/guangda/${GETFILE}
 
 echo ----------`date` CRONTAB END ----------
 ~~~~
 
-
+**注意**：`sed`双引号中才可以带变量，单引号不行。
 
 
 <!-- markdown end -->
@@ -399,7 +399,7 @@ auto_login_ssh <span class="token property">$ip</span> <span class="token proper
 <p>输出: <code>:04:00-1621</code></p>
 
 <ul>
-<li>swaks 自动发邮件</li>
+<li>swaks(perl脚本) 自动发邮件</li>
 </ul>
 
 <pre class=" language-bash"><code class=" language-bash"><span class="token important">#!/bin/bash</span>
@@ -417,10 +417,12 @@ sed <span class="token operator">-</span>i <span class="token string">"s/<span c
 
 sleep <span class="token number">60</span>
 
-export LANG<span class="token operator">=</span>zh_CN<span class="token punctuation">.</span>UTF<span class="token number">-8</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">echo</span> <span class="token string">"guxiang_00"</span> <span class="token operator">|</span> swaks <span class="token operator">-</span>f <span class="token string">"zhangfuxing@shangtong.com"</span> <span class="token operator">--</span>auth<span class="token operator">-</span>user zhangfuxing@shangtong<span class="token punctuation">.</span>com <span class="token operator">-</span>t <span class="token string">"fsbin@shangtong.com"</span> <span class="token operator">-</span>h <span class="token string">"shangtong.com"</span> <span class="token operator">--</span>header <span class="token string">"Subject: 光大对账文件<span class="token property">${YDAY}</span>"</span> <span class="token operator">--</span>body <span class="token string">"见附件"</span> <span class="token operator">--</span>attach <span class="token operator">/</span>home<span class="token operator">/</span>guangda<span class="token operator">/</span><span class="token property">${GETFILE}</span>
+export LANG<span class="token operator">=</span>zh_CN<span class="token punctuation">.</span>UTF<span class="token number">-8</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">echo</span> <span class="token string">"mailpassword"</span> <span class="token operator">|</span> swaks <span class="token operator">-</span>f <span class="token string">"frommail@xx.com"</span> <span class="token operator">--</span>auth<span class="token operator">-</span>user frommail@xx<span class="token punctuation">.</span>com <span class="token operator">-</span>t <span class="token string">"tomail@xx.com"</span> <span class="token operator">-</span>h <span class="token string">"xx.com"</span> <span class="token operator">--</span>header <span class="token string">"Subject: xxxxxx<span class="token property">${YDAY}</span>"</span> <span class="token operator">--</span>body <span class="token string">"见附件"</span> <span class="token operator">--</span>attach <span class="token operator">/</span>home<span class="token operator">/</span>guangda<span class="token operator">/</span><span class="token property">${GETFILE}</span>
 
 <span class="token keyword">echo</span> <span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span>`date` CRONTAB END <span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span>
 </code></pre>
+
+<p><strong>注意</strong>：<code>sed</code>双引号中才可以带变量，单引号不行。</p>
 <!-- content end -->
 </div>
 <br>
